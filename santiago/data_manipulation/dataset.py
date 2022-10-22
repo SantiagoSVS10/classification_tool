@@ -12,16 +12,20 @@ class Dataset_initializer():
         self.train_path=join(self.dataset_path,'train')
         self.val_path=join(self.dataset_path,'val')
         self.test_path=join(self.dataset_path,'test')
+        self.distributed=False
         self.classes=self.get_classes()
         self.verify_dataset_folders()
 
     def create_distribution(self,train_percentage=0.8,val_percentage=0.1,test_percentage=0.1):
         """ Create the distribution of the dataset in train, validation and test folders"""
-
+        
         if math.fsum([train_percentage,val_percentage,test_percentage])!=1.0:
             print('The percentages must sum 1')
             return
 
+        if self.distributed==True:
+            print('The dataset is already distributed')
+            return
         self.distributed_class_files = {}
         for class_name in self.classes:
             class_path = join(self.dataset_path,class_name)
@@ -34,14 +38,36 @@ class Dataset_initializer():
             self.distributed_class_files[class_name] = list([files_in_class,train_images_count,val_images_count,test_images_count])
 
         self.create_train_val_test_folders()
+        #self.verify_distribution(train_images_count,val_images_count,test_images_count)
         self.create_class_folders()
         self.distribute_images()
-
+        self.distributed=True
         print(f'Dataset {self.dataset_name} prepared!')
+    
+    def create_new_distribution(self,train_percentage=0.8,val_percentage=0.1,test_percentage=0.1):
+        """ Create a new distribution of the dataset in train, validation and test folders"""
+        if math.fsum([train_percentage,val_percentage,test_percentage])!=1.0:
+            print('The percentages must sum 1')
+            return
+        self.distributed=False
+        
+        '''delete the old distribution'''
+        shutil.rmtree(self.train_path)
+        shutil.rmtree(self.val_path)
+        shutil.rmtree(self.test_path)
+        '''create the new distribution'''
+        print('Creating new distribution..')
+        self.create_distribution(train_percentage,val_percentage,test_percentage)
+
+    def verify_distribution(self,train_images_count,val_images_count,test_images_count):
+        if os.path.exists(self.train_path) or os.path.exists(self.val_path) or os.path.exists(self.test_path):
+            
+            print('The dataset is already distributed')
+            return
 
     def distribute_images(self):
         """ Copy the images in train, validation and test folders"""
-        #print(self.distributed_class_files)
+        print(self.distributed_class_files)
         for class_name in self.distributed_class_files:
             '''get filenames of each class'''
             class_path = join(self.dataset_path,class_name)
