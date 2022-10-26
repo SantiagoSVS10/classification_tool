@@ -1,0 +1,32 @@
+{
+    "n_classes":1,
+    "model": "custom_model",
+    "optimizer": "Adam",
+    "loss":"binary_crossentropy",
+    "batch_size": 64,
+    "num_epochs": 40,
+    "learning_rate": 0.001,
+  
+    "image_height": 128,
+    "image_width": 128,
+    "channels": 3,
+  
+    "apply_data_augmentation": false,
+    "data_augmentation": {
+        "rotation_range": 20,
+        "width_shift_range": 0.2,
+        "height_shift_range": 0.2,
+        "shear_range": 0.2,
+        "zoom_range": 0.1,
+        "horizontal_flip": true,
+        "vertical_flip": false,
+        "fill_mode" : "constant"
+      },
+
+    "evaluate_validation_metrics":true,
+    "evaluate_test_metrics":false,
+
+    "save_model_results": true
+
+}
+    
