@@ -17,6 +17,7 @@ class DataGenerator(object):
         shuffle=shuffle,
         seed=123,
         batch_size=params.batch_size,
+
         target_size=image_size,
         class_mode='binary',
     )

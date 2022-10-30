@@ -65,9 +65,12 @@ class Dataset_initializer():
         self.distributed=False
 
         '''delete the old distribution'''
-        shutil.rmtree(self.train_path)
-        shutil.rmtree(self.val_path)
-        shutil.rmtree(self.test_path)
+        try:
+            shutil.rmtree(self.train_path)
+            shutil.rmtree(self.val_path)
+            shutil.rmtree(self.test_path)
+        except:
+            pass
         '''create the new distribution'''
         print('Creating new distribution..')
         self.create_distribution(train_percentage,val_percentage,test_percentage)
@@ -128,7 +131,6 @@ class Dataset_initializer():
 
 
     def verify_distribution(self):
-        print(self.params)
         """ Verify if the dataset has the folders train, validation and test"""
         if not os.path.exists(self.train_path) or not os.path.exists(self.val_path) or not os.path.exists(self.test_path):
             print(f'Dataset {self.dataset_name} needs to be prepared!')
@@ -172,7 +174,7 @@ class Dataset_initializer():
         distribution_df = pd.DataFrame({'set':set,'count':count,'class':classe})
         # print(distribution_df)
 
-        sns.set(rc={'figure.figsize':(8,4.5)})
+        sns.set(rc={'figure.figsize':(9,4.5)})
         barplot=sns.barplot(x='set', y='count', hue='class', data=distribution_df)
         plt.title('Training distribution')
         '''change font size of plot'''
@@ -180,7 +182,7 @@ class Dataset_initializer():
                 barplot.get_xticklabels() + barplot.get_yticklabels()):
             item.set_fontsize(13)
 
-        barplot.figure.savefig(join(self.gui_images_path,'current_training_distribution.png'))
+        barplot.figure.savefig(join(self.gui_images_path,'current_training_distribution.png'),bbox_inches='tight')
         plt.close()
         return barplot
 
@@ -190,17 +192,14 @@ class Dataset_initializer():
             for set in ['train','val','test']:
                 for image in os.listdir(join(self.dataset_path,set,class_name)):
                     try:
-                        img = Image.open(join(self.dataset_path,set,class_name,image))
-                        img.verify()
-                        # img_bytes = tf.io.read_file(join(self.dataset_path,set,class_name,image))
-                        # decoded_img = tf.decode_image(img_bytes)
+                        #img_bytes = tf.io.read_file(join(self.dataset_path,set,class_name,image))
+                        #decoded_img = tf.decode_image(img_bytes)
                         print(f'Image {image} is ok!')
                     except:
                         '''delete corrupted image'''
                         os.remove(join(self.dataset_path,set,class_name,image))
                         print(f'Image {image} is corrupted and was deleted!')
-                        #return False
-        #return True
+
 
     def create_data_generators(self):
         """ Create the data generators for train, validation and test"""
@@ -208,5 +207,4 @@ class Dataset_initializer():
         self.train_generator = DataGenerator.generate(self.train_path,self.classes,self.params,shuffle=True)
         self.val_generator = DataGenerator.generate(self.val_path,self.classes,self.params)
         self.test_generator = DataGenerator.generate(self.test_path,self.classes,self.params)
-
         print('Data generators created!')

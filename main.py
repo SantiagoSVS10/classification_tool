@@ -20,4 +20,4 @@ dataset.create_data_generators()
 
 trainer = ModelTrainer(dataset_name,params)
 
-trainer.train(dataset,show_plots=False)
+trainer.train(dataset,show_plots=False,save_plots=True)
