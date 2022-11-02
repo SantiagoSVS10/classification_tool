@@ -3,7 +3,7 @@ from tensorflow.keras.callbacks import History, EarlyStopping, ModelCheckpoint, 
 from santiago.utils.train_utils import PlotLearning,SavePlotLearning
 from os.path import join,exists
 from sklearn.metrics import confusion_matrix, classification_report
-from sklearn.metrics import roc_curve, auc, roc_auc_score, precision_recall_curve, average_precision_score, precision_score, recall_score, f1_score, accuracy_score
+from sklearn.metrics import roc_curve, auc, roc_auc_score, precision_recall_curve, average_precision_score, precision_score, recall_score, f1_score, accuracy_score,PrecisionRecallDisplay
 
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -61,6 +61,8 @@ class ModelTrainer(object):
             self.best_model_path, 'best_model.h5')
         self.history_training_csv_filepath = join(
             self.history_training_path, 'training_history_log.csv')
+        self.final_history_training_csv_filepath = join(
+            self.history_training_path, 'final_training_history_log.csv')
 
 
     def train(self, dataset,window=None,show_plots=False,save_plots=False):
@@ -74,6 +76,11 @@ class ModelTrainer(object):
                     validation_steps=len(dataset.val_generator),
                     callbacks=self.callbacks_list)
                        
+
+        '''save history'''
+        history_df = pd.DataFrame(self.history.history)
+        history_df.to_csv(self.final_history_training_csv_filepath, index=False)
+
     def test_model_with_generator(self,dataset,set_name):
         
         '''get y_true and y_pred'''
@@ -89,49 +96,97 @@ class ModelTrainer(object):
         '''get y_true from generator'''
         y_true = generator.classes
         y_pred = self.model.predict(generator,steps=len(generator),verbose=1)
+        y_pred = y_pred.flatten()
+        self.precision_recall_curves(save_path,set_name,y_true,y_pred)
+        self.roc_auc_curves(save_path,set_name,y_true,y_pred)
+
         for i in range(len(y_pred)):
             if y_pred[i]>=0.5:
                 y_pred[i]=1
             else:
                 y_pred[i]=0
-
-        '''convert y_pred to one dimensional'''
-        y_pred = y_pred.flatten()
-
+        
         '''get metrics'''
         accuracy=accuracy_score(y_true,y_pred)
-        presition=precision_score(y_true,y_pred,average="macro")
-        recall=recall_score(y_true,y_pred,average="macro")
-        f1=f1_score(y_true,y_pred,average="macro",zero_division=0)
+        presition=precision_score(y_true,y_pred)
+        recall=recall_score(y_true,y_pred)
+        f1=f1_score(y_true,y_pred,zero_division=0)
         auc=roc_auc_score(y_true,y_pred)
-        average_precision=average_precision_score(y_true,y_pred)
         matrix_confusion = (confusion_matrix(y_true, y_pred))
-        report = classification_report(y_true, y_pred, target_names=dataset.classes,digits=3,output_dict=True)
+        FP=matrix_confusion[0][1]
+        FN=matrix_confusion[1][0]
+        TP=matrix_confusion[1][1]
+        TN=matrix_confusion[0][0]
 
-        self.precision_recall_curves(save_path,set_name,y_true,y_pred)
-        #auc_roc(results_dir,setname,true_categories_tf, test_predictions_tf)
+        '''make csv with metrics'''
+        metrics_df = pd.DataFrame({'accuracy':accuracy,
+                                      'presition':presition,
+                                      'recall':recall,
+                                      'f1':f1,
+                                      'auc':auc,
+                                      'FP':FP,
+                                      'FN':FN,
+                                      'TP':TP,
+                                      'TN':TN},index=[0])
+        metrics_df.to_csv(join(save_path,set_name+'_metrics.csv'), index=False)
+
+        '''print metrics'''
+        print('Accuracy: ',accuracy)
+        print('Precision: ',presition)
+        print('Recall: ',recall)
+        print('F1: ',f1)
+        print('AUC: ',auc)
+        print('False Positive: ',FP)
+        print('False Negative: ',FN)
+        print('True Positive: ',TP)
+        print('True Negative: ',TN)
+        
+        report = classification_report(y_true, y_pred, target_names=dataset.classes,digits=3,output_dict=True)
+        
+        '''delete keys that are not classes'''
+        del report['accuracy']
+        del report['macro avg']
+        del report['weighted avg']
+
+        '''save csv with metrics'''
 
         self.make_csv(save_path,filepaths,y_true,y_pred)
 
         plt.close()
         plt.figure(figsize=(10, 10))
-        
         sns.heatmap(matrix_confusion, square=True, annot=True, cmap='Blues', fmt='d', cbar=False)
         plt.xlabel('predicted value')
         plt.ylabel('true value')
         plt.savefig(join(save_path,"confusion_matrix.png"),bbox_inches='tight')
-
         plt.close()
         #cr=classification_report(true_categories, test_predictions, target_names=params.classes, digits=3,output_dict=True)
-        df_cr=pd.DataFrame(report).transpose()
-        df_cr.to_csv(join(save_path,"classification_report.csv"))
-
+        
+        
+    def make_metrics_csv(self,save_path,metrics):
+        pass
     def make_csv(self,save_path,filenames,y_true,y_pred):
         batch_csv=pd.DataFrame()
         batch_csv['filename'] = pd.Series(filenames)
         batch_csv['y_true'] = pd.Series(y_true)
         batch_csv['y_pred'] = pd.Series(y_pred)
         batch_csv.to_csv(join(save_path,'classificated_images.csv'),index=False)
+
+    '''function to calculate TP,FP,TN,FN'''
+    def calculate_TP_FP_TN_FN(self,y_true,y_pred):
+        TP=0
+        FP=0
+        TN=0
+        FN=0
+        for i in range(len(y_true)):
+            if y_true[i]==1 and y_pred[i]==1:
+                TP+=1
+            elif y_true[i]==0 and y_pred[i]==1:
+                FP+=1
+            elif y_true[i]==0 and y_pred[i]==0:
+                TN+=1
+            elif y_true[i]==1 and y_pred[i]==0:
+                FN+=1
+        return TP,FP,TN,FN
 
     def precision_recall_curves(self,save_path,set_name,true_categories_tf,test_predictions_tf):
         plt.close()
@@ -145,6 +200,29 @@ class ModelTrainer(object):
         plt.xlim([0.0, 1.0])
         plt.savefig(join(save_path,"precision_recall_curve.png"),bbox_inches='tight')
 
+        '''plot another precision recall curve'''
+        plt.close()
+        plt.figure(figsize=(10, 10))
+        display = PrecisionRecallDisplay.from_predictions(true_categories_tf, test_predictions_tf, name="LinearSVC")
+        _ = display.ax_.set_title("2-class Precision-Recall curve")
+        plt.savefig(join(save_path,"precision_recall_curve_2.png"),bbox_inches='tight')
+        plt.close()
+
+    def roc_auc_curves(self,save_path,set_name,true_categories_tf,test_predictions_tf):
+        plt.close()
+        plt.figure(figsize=(10, 10))
+        fpr, tpr, _ = roc_curve(true_categories_tf, test_predictions_tf)
+        roc_auc = auc(fpr, tpr)
+        plt.plot(fpr, tpr, color='darkorange', lw=2, label='ROC curve (area = %0.2f)' % roc_auc)
+        plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
+        plt.xlim([0.0, 1.0])
+        plt.ylim([0.0, 1.05])
+        plt.xlabel('False Positive Rate')
+        plt.ylabel('True Positive Rate')
+        plt.title('Receiver operating characteristic')
+        plt.legend(loc="lower right")
+        plt.savefig(join(save_path,"roc_auc_curve.png"),bbox_inches='tight')
+
     def plot_history(self):
 
         plt.close()
@@ -154,7 +232,7 @@ class ModelTrainer(object):
         plt.title('model accuracy')
         plt.ylabel('accuracy')
         plt.xlabel('epoch')
-        plt.legend(['train', 'test'], loc='upper left')
+        plt.legend(['train', 'val'], loc='upper left')
         acc_fig=plt.savefig(join(self.history_training_path,"accuracy"+".png"),bbox_inches='tight')
         plt.close()
 
@@ -166,7 +244,7 @@ class ModelTrainer(object):
         plt.title('model loss')
         plt.ylabel('loss')
         plt.xlabel('epoch')
-        plt.legend(['train', 'test'], loc='upper left')
+        plt.legend(['train', 'val'], loc='upper left')
         # plt.savefig(results_dir+"/loss_acc.png")
         loss_fig=plt.savefig(join(self.history_training_path,"loss"+".png"),bbox_inches='tight')
         plt.close()

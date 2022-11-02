@@ -1,9 +1,10 @@
+import signal
 from PyQt5.QtCore import QObject, QThread, pyqtSignal
 from santiago.data_manipulation.dataset import Dataset_initializer
 from santiago.data_manipulation.result import Results
 from santiago.utils.json_params import Params
 from santiago.model.trainer import ModelTrainer
-from PyQt5.QtWidgets import QApplication, QMainWindow 
+from PyQt5.QtWidgets import QApplication, QMainWindow,QListWidgetItem
 
 
 from watchdog.observers import Observer
@@ -11,6 +12,7 @@ from watchdog.events import FileSystemEventHandler
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from matplotlib.figure import Figure
+from os.path import join
 import matplotlib.pyplot as plt
 plt.ioff()
 
@@ -56,6 +58,7 @@ class MainWindow(QMainWindow):
         self.put_results_in_analyse_toolbox()
         self.dataset_list.itemDoubleClicked.connect(self.select_dataset_from_list)
         self.result_list.itemDoubleClicked.connect(self.select_result_from_list)
+        self.qt_experiments_list.itemChanged.connect(self.get_checked_experiments)
         self.save_params_button.clicked.connect(self.save_params_from_entries)
         self.train_button.clicked.connect(self.start_training_thread)
         self.distribution_button.clicked.connect(self.make_new_distribution_gui)
@@ -75,9 +78,37 @@ class MainWindow(QMainWindow):
     
     def select_result_from_list(self):
         """Select a result from the list"""
+        self.checked_experiments=[]
         self.selected_result_name = self.result_list.currentItem().text()
         self.current_result=Results(self.selected_result_name)
         self.current_result.get_results_folders()
+        self.put_experiments_in_experiments_list()
+        
+    def put_experiments_in_experiments_list(self):
+        '''delete previous experiments'''
+        self.qt_experiments_list.clear()
+
+        '''put each experiment in the list as checkbox'''
+        for experiment in self.current_result.valid_experiment_list:
+            new_experiment_item=QtWidgets.QListWidgetItem(experiment)
+            '''set item check with double click'''
+            new_experiment_item.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)            
+            new_experiment_item.setCheckState(QtCore.Qt.Unchecked)
+            self.qt_experiments_list.addItem(new_experiment_item)
+
+    def get_checked_experiments(self):
+        """Get the checked experiments"""
+        self.checked_experiments=[]
+        for i in range(self.qt_experiments_list.count()):
+            if self.qt_experiments_list.item(i).checkState()==2:       
+                experiment_path=join(self.results_path,self.current_result.result_name,self.qt_experiments_list.item(i).text())
+                '''verify if the experiment is finished'''
+                if os.path.exists(join(experiment_path,'best_model','best_model.h5')):
+                    if os.path.exists(join(experiment_path,'metrics_evaluation','val','val_metrics.csv')):
+                        
+                        print('experiment finished')
+                self.checked_experiments.append(experiment_path)
+        print(self.checked_experiments)
 
     def make_new_distribution_gui(self):
         """Make a new distribution of the current dataset"""
@@ -93,6 +124,20 @@ class MainWindow(QMainWindow):
         self.train_progress.setValue(0)
         self.training_thread = TrainingThread(self.current_dataset,self.selected_dataset_name,self.params)
         self.training_thread.start()
+        '''wait for the thread to finish'''
+        self.training_thread.finished.connect(self.test_model)
+        print('finished training thread')
+
+
+    def test_model(self):
+        """Test the model in the test and validation dataset"""
+        '''use trainer object from the training thread'''
+        self.train_progress.setValue(100)
+        self.trainer=self.training_thread.trainer
+
+        self.trainer.plot_history()
+        self.trainer.test_model_with_generator(self.current_dataset,'test')
+        self.trainer.test_model_with_generator(self.current_dataset,'val')
 
     # def start_training(self):
     #     """Start the training"""
@@ -143,8 +188,6 @@ class MainWindow(QMainWindow):
         image_profile = image_profile.scaled(width, height, QtCore.Qt.KeepAspectRatio)  
         label.setPixmap(QtGui.QPixmap.fromImage(image_profile)) 
         
-        #self.set_progress(progress)
-
     def clean_display(self,label):
         """Clean the display"""
         label.setText('')
@@ -200,6 +243,8 @@ class MainWindow(QMainWindow):
         self.thread = CodeThread(self)
         self.thread.start()
 
+    
+
 '''class to run training in a thread'''
 class TrainingThread(QThread):
     def __init__(self,current_dataset,selected_dataset_name,params):
@@ -214,18 +259,19 @@ class TrainingThread(QThread):
     def start_training(self):
         """Start the training"""
         self.current_dataset.create_data_generators()
-        '''star pyqt5 progress bar'''
-
-
         self.trainer = ModelTrainer(self.selected_dataset_name,self.params)
         self.trainer.train(self.current_dataset,window,show_plots=False,save_plots=True)
-        self.test_model()
+        
+        self.exit()
+
+        
 
     def test_model(self):
         """Test the model in the test and validation dataset"""
         self.trainer.plot_history()
         self.trainer.test_model_with_generator(self.current_dataset,'test')
         self.trainer.test_model_with_generator(self.current_dataset,'val')
+        print('Finished!!')
         #window.train_progress.setValue(100)
 
 class MyEventHandler(FileSystemEventHandler):

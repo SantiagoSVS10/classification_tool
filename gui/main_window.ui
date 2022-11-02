@@ -258,7 +258,7 @@ border-color: rgb(165, 165, 165);</string>
               </widget>
              </item>
              <item>
-              <widget class="QFrame" name="frame">
+              <widget class="QFrame" name="experiments_frame">
                <property name="styleSheet">
                 <string notr="true">background-color: rgb(225, 225, 225);</string>
                </property>
@@ -268,6 +268,20 @@ border-color: rgb(165, 165, 165);</string>
                <property name="frameShadow">
                 <enum>QFrame::Sunken</enum>
                </property>
+               <layout class="QVBoxLayout" name="verticalLayout_11">
+                <property name="leftMargin">
+                 <number>0</number>
+                </property>
+                <property name="topMargin">
+                 <number>0</number>
+                </property>
+                <property name="rightMargin">
+                 <number>0</number>
+                </property>
+                <item>
+                 <widget class="QListWidget" name="qt_experiments_list"/>
+                </item>
+               </layout>
               </widget>
              </item>
             </layout>
@@ -288,8 +302,23 @@ border-color: rgb(165, 165, 165);</string>
              <number>5</number>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_8">
+             <property name="leftMargin">
+              <number>2</number>
+             </property>
+             <property name="topMargin">
+              <number>2</number>
+             </property>
+             <property name="rightMargin">
+              <number>2</number>
+             </property>
+             <property name="bottomMargin">
+              <number>2</number>
+             </property>
              <item>
               <widget class="QFrame" name="R_up_frame">
+               <property name="styleSheet">
+                <string notr="true">background-color: rgb(220, 220, 220);</string>
+               </property>
                <property name="frameShape">
                 <enum>QFrame::StyledPanel</enum>
                </property>
@@ -297,8 +326,23 @@ border-color: rgb(165, 165, 165);</string>
                 <enum>QFrame::Raised</enum>
                </property>
                <layout class="QGridLayout" name="gridLayout" rowstretch="1,1" columnstretch="1,1">
+                <property name="leftMargin">
+                 <number>4</number>
+                </property>
+                <property name="topMargin">
+                 <number>4</number>
+                </property>
+                <property name="rightMargin">
+                 <number>4</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>4</number>
+                </property>
                 <item row="0" column="0">
                  <widget class="QFrame" name="params_frame">
+                  <property name="styleSheet">
+                   <string notr="true">background-color: rgb(235, 235, 235);</string>
+                  </property>
                   <property name="frameShape">
                    <enum>QFrame::StyledPanel</enum>
                   </property>
@@ -431,8 +475,8 @@ border-color: rgb(165, 165, 165);</string>
                           <rect>
                            <x>0</x>
                            <y>0</y>
-                           <width>306</width>
-                           <height>265</height>
+                           <width>318</width>
+                           <height>277</height>
                           </rect>
                          </property>
                          <layout class="QFormLayout" name="formLayout">
@@ -687,6 +731,9 @@ border-color: rgb(165, 165, 165);</string>
                 </item>
                 <item row="0" column="1">
                  <widget class="QFrame" name="train_frame">
+                  <property name="styleSheet">
+                   <string notr="true">background-color: rgb(235, 235, 235);</string>
+                  </property>
                   <property name="frameShape">
                    <enum>QFrame::StyledPanel</enum>
                   </property>
@@ -739,6 +786,9 @@ border-color: rgb(165, 165, 165);</string>
                 </item>
                 <item row="1" column="0">
                  <widget class="QFrame" name="distribution_frame">
+                  <property name="styleSheet">
+                   <string notr="true">background-color: rgb(235, 235, 235);</string>
+                  </property>
                   <property name="frameShape">
                    <enum>QFrame::StyledPanel</enum>
                   </property>
@@ -758,6 +808,9 @@ border-color: rgb(165, 165, 165);</string>
                 </item>
                 <item row="1" column="1">
                  <widget class="QFrame" name="training_frame">
+                  <property name="styleSheet">
+                   <string notr="true">background-color: rgb(235, 235, 235);</string>
+                  </property>
                   <property name="frameShape">
                    <enum>QFrame::StyledPanel</enum>
                   </property>
@@ -768,7 +821,7 @@ border-color: rgb(165, 165, 165);</string>
                    <item>
                     <widget class="QLabel" name="train_label">
                      <property name="text">
-                      <string>train_label</string>
+                      <string/>
                      </property>
                     </widget>
                    </item>
@@ -780,6 +833,9 @@ border-color: rgb(165, 165, 165);</string>
              </item>
              <item>
               <widget class="QFrame" name="R_bot_frame">
+               <property name="styleSheet">
+                <string notr="true">background-color: rgb(220, 220, 220);</string>
+               </property>
                <property name="frameShape">
                 <enum>QFrame::StyledPanel</enum>
                </property>
