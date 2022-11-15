@@ -6,10 +6,6 @@ from santiago.utils.json_params import Params
 from santiago.model.trainer import ModelTrainer
 from PyQt5.QtWidgets import QApplication, QMainWindow,QListWidgetItem
 
-
-from watchdog.observers import Observer
-from watchdog.events import FileSystemEventHandler
-
 from PyQt5 import QtCore, QtGui, QtWidgets
 from matplotlib.figure import Figure
 from os.path import join
@@ -17,7 +13,6 @@ import matplotlib.pyplot as plt
 plt.ioff()
 
 from PyQt5.uic import loadUi
-from watchdog.observers import Observer
 import warnings
 import time
 import sys
@@ -40,6 +35,12 @@ plt.rcParams['xtick.color'] = 'white'
 plt.rcParams['ytick.color'] = 'white'
 plt.rcParams['axes.labelcolor'] = 'white'
 
+'''create class for result widget'''
+class ResultWidget(QtWidgets.QWidget):
+    def __init__(self, parent=None):
+        super(ResultWidget, self).__init__(parent)
+        self.ui = loadUi('gui/result_widget.ui', self)
+        
 
 class MainWindow(QMainWindow):
     datasets_path = 'data/datasets'
@@ -63,9 +64,8 @@ class MainWindow(QMainWindow):
         self.train_button.clicked.connect(self.start_training_thread)
         self.distribution_button.clicked.connect(self.make_new_distribution_gui)
         self.toolBox.currentChanged.connect(self.change_between_train_and_analyse)
-        #self.star_thread_code()
-        self.write_params_in_items()
         
+        self.write_params_in_items()
         self.show()
 
     def select_dataset_from_list(self):
@@ -102,14 +102,27 @@ class MainWindow(QMainWindow):
         for i in range(self.qt_experiments_list.count()):
             if self.qt_experiments_list.item(i).checkState()==2:       
                 experiment_path=join(self.results_path,self.current_result.result_name,self.qt_experiments_list.item(i).text())
-                '''verify if the experiment is finished'''
-                if os.path.exists(join(experiment_path,'best_model','best_model.h5')):
-                    if os.path.exists(join(experiment_path,'metrics_evaluation','val','val_metrics.csv')):
-                        
-                        print('experiment finished')
                 self.checked_experiments.append(experiment_path)
-        print(self.checked_experiments)
+        # print(self.checked_experiments)
+        
+        self.current_result.make_results_dataframe(self.checked_experiments)
+  
+        
+        self.clean_layout(self.val_results_layout)
+        self.clean_layout(self.test_results_layout)
+        if len(self.checked_experiments)>0: 
+            self.current_result.val_df.apply(self.put_widgets_by_dataframe,axis=1,args=(self.val_results_layout,))
+            self.current_result.test_df.apply(self.put_widgets_by_dataframe,axis=1,args=(self.test_results_layout,))
 
+    def put_widgets_by_dataframe(self,experiment,layout):
+        new_result_widget=ResultWidget()
+        layout.addWidget(new_result_widget)
+        
+    def clean_layout(self,layout):
+        print('cleaning layout')
+        for i in reversed(range(layout.count())): 
+            layout.itemAt(i).widget().setParent(None)
+            
     def make_new_distribution_gui(self):
         """Make a new distribution of the current dataset"""
         train_percent=float(self.train_entry.text())
@@ -273,33 +286,6 @@ class TrainingThread(QThread):
         self.trainer.test_model_with_generator(self.current_dataset,'val')
         print('Finished!!')
         #window.train_progress.setValue(100)
-
-class MyEventHandler(FileSystemEventHandler):
-    def on_modified(self, event):
-        if event.src_path == "gui/images\plot.png":
-            time.sleep(2)
-            MainWindow.display_image(self,'gui/images/plot.png',window.train_label)
-
-'''class to run code in a thread'''
-class CodeThread(QThread):
-    def __init__(self):
-        QThread.__init__(self)
-        
-    def run(self):
-        self.run_code()
-
-    def run_code(self):
-        observer = Observer()
-        event_handler = MyEventHandler()
-        observer.schedule(MyEventHandler(), "gui/images", recursive=False)
-        observer.start()
-        try:
-            while observer.is_alive():
-                time.sleep(1)
-                observer.join(1)
-        except KeyboardInterrupt:
-            observer.stop()
-        observer.join()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

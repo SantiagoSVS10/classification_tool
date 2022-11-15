@@ -108,7 +108,7 @@ class ModelTrainer(object):
         
         '''get metrics'''
         accuracy=accuracy_score(y_true,y_pred)
-        presition=precision_score(y_true,y_pred)
+        precition=precision_score(y_true,y_pred,zero_division=0)
         recall=recall_score(y_true,y_pred)
         f1=f1_score(y_true,y_pred,zero_division=0)
         auc=roc_auc_score(y_true,y_pred)
@@ -120,7 +120,7 @@ class ModelTrainer(object):
 
         '''make csv with metrics'''
         metrics_df = pd.DataFrame({'accuracy':accuracy,
-                                      'presition':presition,
+                                      'precition':precition,
                                       'recall':recall,
                                       'f1':f1,
                                       'auc':auc,
@@ -132,7 +132,7 @@ class ModelTrainer(object):
 
         '''print metrics'''
         print('Accuracy: ',accuracy)
-        print('Precision: ',presition)
+        print('Precision: ',precition)
         print('Recall: ',recall)
         print('F1: ',f1)
         print('AUC: ',auc)
@@ -252,7 +252,7 @@ class ModelTrainer(object):
 
     def create_callbacks(self,window=None, show_learning_curves=False,save_plots=False):
         
-        early_stop = EarlyStopping(monitor='val_loss', patience=100)
+        early_stop = EarlyStopping(monitor='val_loss', patience=3)
         
         if(self.params.save_model_results):
             model_checkpoint = ModelCheckpoint(
