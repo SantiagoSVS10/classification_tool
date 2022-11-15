@@ -861,11 +861,11 @@ border-color: rgb(165, 165, 165);</string>
                 <item>
                  <widget class="QTabWidget" name="tabWidget">
                   <property name="currentIndex">
-                   <number>0</number>
+                   <number>1</number>
                   </property>
                   <widget class="QWidget" name="tab">
                    <attribute name="title">
-                    <string>Tab 1</string>
+                    <string>Validation</string>
                    </attribute>
                    <layout class="QVBoxLayout" name="verticalLayout_13">
                     <property name="spacing">
@@ -924,7 +924,7 @@ border-color: rgb(165, 165, 165);</string>
                   </widget>
                   <widget class="QWidget" name="tab_2">
                    <attribute name="title">
-                    <string>Tab 2</string>
+                    <string>Test</string>
                    </attribute>
                    <layout class="QHBoxLayout" name="horizontalLayout_5">
                     <property name="spacing">

@@ -29,10 +29,10 @@ class Results():
             return
         for experiment in checked_experiment_list:
             temp_test_df = pd.read_csv(join(experiment,'metrics_evaluation','test','test_metrics.csv'))
-            temp_test_df['experiment']=experiment
+            temp_test_df['experiment_path']=experiment;temp_test_df['set']='test'
             test_df_list.append(temp_test_df)
             temp_val_df = pd.read_csv(join(experiment,'metrics_evaluation','val','val_metrics.csv'))
-            temp_val_df['experiment']=experiment
+            temp_val_df['experiment_path']=experiment;temp_val_df['set']='val'
             val_df_list.append(temp_val_df)
         self.val_df = pd.concat(val_df_list)
         self.test_df = pd.concat(test_df_list)

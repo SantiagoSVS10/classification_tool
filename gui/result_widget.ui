@@ -6,20 +6,20 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1439</width>
-    <height>280</height>
+    <width>1778</width>
+    <height>285</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>0</width>
-    <height>280</height>
+    <height>285</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>16777215</width>
-    <height>280</height>
+    <height>286</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -85,6 +85,18 @@
          </property>
          <item>
           <widget class="QLabel" name="acc_graph">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>265</width>
+             <height>265</height>
+            </size>
+           </property>
            <property name="text">
             <string>TextLabel</string>
            </property>
@@ -92,13 +104,25 @@
          </item>
          <item>
           <widget class="QLabel" name="loss_graph">
+           <property name="minimumSize">
+            <size>
+             <width>265</width>
+             <height>265</height>
+            </size>
+           </property>
            <property name="text">
             <string>TextLabel</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="CM_graph">
+          <widget class="QLabel" name="matrix_graph">
+           <property name="minimumSize">
+            <size>
+             <width>265</width>
+             <height>265</height>
+            </size>
+           </property>
            <property name="text">
             <string>TextLabel</string>
            </property>
@@ -106,6 +130,12 @@
          </item>
          <item>
           <widget class="QLabel" name="pres_rec_graph">
+           <property name="minimumSize">
+            <size>
+             <width>265</width>
+             <height>265</height>
+            </size>
+           </property>
            <property name="text">
             <string>TextLabel</string>
            </property>
@@ -113,6 +143,12 @@
          </item>
          <item>
           <widget class="QLabel" name="roc_auc_graph">
+           <property name="minimumSize">
+            <size>
+             <width>265</width>
+             <height>265</height>
+            </size>
+           </property>
            <property name="text">
             <string>TextLabel</string>
            </property>
@@ -127,15 +163,33 @@
             <enum>QFrame::Raised</enum>
            </property>
            <layout class="QFormLayout" name="formLayout">
+            <property name="sizeConstraint">
+             <enum>QLayout::SetMinAndMaxSize</enum>
+            </property>
+            <property name="fieldGrowthPolicy">
+             <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+            </property>
+            <property name="labelAlignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+            <property name="formAlignment">
+             <set>Qt::AlignCenter</set>
+            </property>
             <item row="0" column="0">
              <widget class="QLabel" name="label">
+              <property name="styleSheet">
+               <string notr="true">font: 63 12pt &quot;Bahnschrift SemiBold SemiConden&quot;;</string>
+              </property>
               <property name="text">
                <string>Accuracy:</string>
               </property>
              </widget>
             </item>
             <item row="0" column="1">
-             <widget class="QLabel" name="label_2">
+             <widget class="QLabel" name="acc_label">
+              <property name="styleSheet">
+               <string notr="true">font: 63 12pt &quot;Bahnschrift SemiBold SemiConden&quot;;</string>
+              </property>
               <property name="text">
                <string>TextLabel</string>
               </property>
@@ -143,13 +197,19 @@
             </item>
             <item row="1" column="0">
              <widget class="QLabel" name="label_3">
+              <property name="styleSheet">
+               <string notr="true">font: 63 12pt &quot;Bahnschrift SemiBold SemiConden&quot;;</string>
+              </property>
               <property name="text">
-               <string>Precition</string>
+               <string>Precision</string>
               </property>
              </widget>
             </item>
             <item row="2" column="0">
              <widget class="QLabel" name="label_4">
+              <property name="styleSheet">
+               <string notr="true">font: 63 12pt &quot;Bahnschrift SemiBold SemiConden&quot;;</string>
+              </property>
               <property name="text">
                <string>Recall</string>
               </property>
@@ -157,6 +217,9 @@
             </item>
             <item row="3" column="0">
              <widget class="QLabel" name="label_5">
+              <property name="styleSheet">
+               <string notr="true">font: 63 12pt &quot;Bahnschrift SemiBold SemiConden&quot;;</string>
+              </property>
               <property name="text">
                <string>F1</string>
               </property>
@@ -164,34 +227,49 @@
             </item>
             <item row="4" column="0">
              <widget class="QLabel" name="label_6">
+              <property name="styleSheet">
+               <string notr="true">font: 63 12pt &quot;Bahnschrift SemiBold SemiConden&quot;;</string>
+              </property>
               <property name="text">
                <string>Auc</string>
               </property>
              </widget>
             </item>
             <item row="1" column="1">
-             <widget class="QLabel" name="label_7">
+             <widget class="QLabel" name="precition_label">
+              <property name="styleSheet">
+               <string notr="true">font: 63 12pt &quot;Bahnschrift SemiBold SemiConden&quot;;</string>
+              </property>
               <property name="text">
                <string>TextLabel</string>
               </property>
              </widget>
             </item>
             <item row="4" column="1">
-             <widget class="QLabel" name="label_8">
+             <widget class="QLabel" name="auc_label">
+              <property name="styleSheet">
+               <string notr="true">font: 63 12pt &quot;Bahnschrift SemiBold SemiConden&quot;;</string>
+              </property>
               <property name="text">
                <string>TextLabel</string>
               </property>
              </widget>
             </item>
             <item row="2" column="1">
-             <widget class="QLabel" name="label_9">
+             <widget class="QLabel" name="recall_label">
+              <property name="styleSheet">
+               <string notr="true">font: 63 12pt &quot;Bahnschrift SemiBold SemiConden&quot;;</string>
+              </property>
               <property name="text">
                <string>TextLabel</string>
               </property>
              </widget>
             </item>
             <item row="3" column="1">
-             <widget class="QLabel" name="label_10">
+             <widget class="QLabel" name="f1_label">
+              <property name="styleSheet">
+               <string notr="true">font: 63 12pt &quot;Bahnschrift SemiBold SemiConden&quot;;</string>
+              </property>
               <property name="text">
                <string>TextLabel</string>
               </property>
@@ -199,13 +277,19 @@
             </item>
             <item row="5" column="0">
              <widget class="QLabel" name="label_11">
+              <property name="styleSheet">
+               <string notr="true">font: 63 12pt &quot;Bahnschrift SemiBold SemiConden&quot;;</string>
+              </property>
               <property name="text">
                <string>False Positive</string>
               </property>
              </widget>
             </item>
             <item row="5" column="1">
-             <widget class="QLabel" name="label_12">
+             <widget class="QLabel" name="FP_label">
+              <property name="styleSheet">
+               <string notr="true">font: 63 12pt &quot;Bahnschrift SemiBold SemiConden&quot;;</string>
+              </property>
               <property name="text">
                <string>TextLabel</string>
               </property>
@@ -213,13 +297,19 @@
             </item>
             <item row="6" column="0">
              <widget class="QLabel" name="label_13">
+              <property name="styleSheet">
+               <string notr="true">font: 63 12pt &quot;Bahnschrift SemiBold SemiConden&quot;;</string>
+              </property>
               <property name="text">
                <string>False Negative</string>
               </property>
              </widget>
             </item>
             <item row="6" column="1">
-             <widget class="QLabel" name="label_14">
+             <widget class="QLabel" name="FN_label">
+              <property name="styleSheet">
+               <string notr="true">font: 63 12pt &quot;Bahnschrift SemiBold SemiConden&quot;;</string>
+              </property>
               <property name="text">
                <string>TextLabel</string>
               </property>
@@ -227,13 +317,19 @@
             </item>
             <item row="7" column="0">
              <widget class="QLabel" name="label_15">
+              <property name="styleSheet">
+               <string notr="true">font: 63 12pt &quot;Bahnschrift SemiBold SemiConden&quot;;</string>
+              </property>
               <property name="text">
                <string>True Positive</string>
               </property>
              </widget>
             </item>
             <item row="7" column="1">
-             <widget class="QLabel" name="label_16">
+             <widget class="QLabel" name="TP_label">
+              <property name="styleSheet">
+               <string notr="true">font: 63 12pt &quot;Bahnschrift SemiBold SemiConden&quot;;</string>
+              </property>
               <property name="text">
                <string>TextLabel</string>
               </property>
@@ -241,13 +337,19 @@
             </item>
             <item row="8" column="0">
              <widget class="QLabel" name="label_17">
+              <property name="styleSheet">
+               <string notr="true">font: 63 12pt &quot;Bahnschrift SemiBold SemiConden&quot;;</string>
+              </property>
               <property name="text">
                <string>True Negative</string>
               </property>
              </widget>
             </item>
             <item row="8" column="1">
-             <widget class="QLabel" name="label_18">
+             <widget class="QLabel" name="TN_label">
+              <property name="styleSheet">
+               <string notr="true">font: 63 12pt &quot;Bahnschrift SemiBold SemiConden&quot;;</string>
+              </property>
               <property name="text">
                <string>TextLabel</string>
               </property>
