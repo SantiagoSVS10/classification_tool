@@ -74,6 +74,77 @@
          <property name="frameShadow">
           <enum>QFrame::Sunken</enum>
          </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_6">
+          <item>
+           <spacer name="horizontalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>Organize experiments by:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="comboOrganizer">
+            <item>
+             <property name="text">
+              <string>accuracy</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>precision</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>recall</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>f1</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>auc</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>FP</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>FN</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>TP</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>TN</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+         </layout>
         </widget>
        </item>
        <item>
@@ -178,7 +249,7 @@ border-color: rgb(165, 165, 165);</string>
                   <x>0</x>
                   <y>0</y>
                   <width>234</width>
-                  <height>318</height>
+                  <height>309</height>
                  </rect>
                 </property>
                 <property name="cursor">
@@ -221,7 +292,7 @@ border-color: rgb(165, 165, 165);</string>
                   <x>0</x>
                   <y>0</y>
                   <width>234</width>
-                  <height>318</height>
+                  <height>309</height>
                  </rect>
                 </property>
                 <attribute name="label">
@@ -740,7 +811,10 @@ border-color: rgb(165, 165, 165);</string>
                   <property name="frameShadow">
                    <enum>QFrame::Raised</enum>
                   </property>
-                  <layout class="QVBoxLayout" name="verticalLayout_5">
+                  <layout class="QVBoxLayout" name="verticalLayout_5" stretch="3,0,3">
+                   <property name="sizeConstraint">
+                    <enum>QLayout::SetDefaultConstraint</enum>
+                   </property>
                    <item>
                     <widget class="QProgressBar" name="train_progress">
                      <property name="sizePolicy">
@@ -760,6 +834,22 @@ border-color: rgb(165, 165, 165);</string>
                      </property>
                      <property name="value">
                       <number>0</number>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QLabel" name="train_status_label">
+                     <property name="maximumSize">
+                      <size>
+                       <width>16777215</width>
+                       <height>40</height>
+                      </size>
+                     </property>
+                     <property name="styleSheet">
+                      <string notr="true">font: 14pt &quot;Cascadia Code&quot;;</string>
+                     </property>
+                     <property name="text">
+                      <string>TextLabel</string>
                      </property>
                     </widget>
                    </item>
@@ -861,7 +951,7 @@ border-color: rgb(165, 165, 165);</string>
                 <item>
                  <widget class="QTabWidget" name="tabWidget">
                   <property name="currentIndex">
-                   <number>1</number>
+                   <number>0</number>
                   </property>
                   <widget class="QWidget" name="tab">
                    <attribute name="title">
@@ -894,7 +984,7 @@ border-color: rgb(165, 165, 165);</string>
                          <x>0</x>
                          <y>0</y>
                          <width>1076</width>
-                         <height>339</height>
+                         <height>331</height>
                         </rect>
                        </property>
                        <layout class="QVBoxLayout" name="verticalLayout_12">
@@ -953,7 +1043,7 @@ border-color: rgb(165, 165, 165);</string>
                          <x>0</x>
                          <y>0</y>
                          <width>1076</width>
-                         <height>339</height>
+                         <height>331</height>
                         </rect>
                        </property>
                        <layout class="QVBoxLayout" name="verticalLayout_14">

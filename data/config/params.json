@@ -1,13 +1,13 @@
 {
     "n_classes": 1,
-    "model": "custom_model",
+    "model": "cls_model",
     "optimizer": "Adam",
     "loss": "binary_crossentropy",
     "batch_size": 64,
-    "num_epochs": 1,
-    "learning_rate": 0.5,
-    "image_height": 128,
-    "image_width": 128,
+    "num_epochs": 40,
+    "learning_rate": 0.001,
+    "image_height": 64,
+    "image_width": 64,
     "channels": 3,
     "apply_data_augmentation": false,
     "data_augmentation": {

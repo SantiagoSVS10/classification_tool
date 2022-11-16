@@ -20,7 +20,7 @@ class Results():
                     if os.path.exists(join(experiment_path,'metrics_evaluation','val','val_metrics.csv')):
                         self.valid_experiment_list.append(experiment)
 
-    def make_results_dataframe(self,checked_experiment_list):
+    def make_results_dataframe(self,checked_experiment_list,sort_by):
         val_df_list=[]
         test_df_list=[]
         self.val_df = pd.DataFrame()
@@ -34,8 +34,12 @@ class Results():
             temp_val_df = pd.read_csv(join(experiment,'metrics_evaluation','val','val_metrics.csv'))
             temp_val_df['experiment_path']=experiment;temp_val_df['set']='val'
             val_df_list.append(temp_val_df)
+        '''concat and sort'''
         self.val_df = pd.concat(val_df_list)
         self.test_df = pd.concat(test_df_list)
+        self.val_df.sort_values(by=sort_by,inplace=True,ascending=False)
+        self.test_df.sort_values(by=sort_by,inplace=True,ascending=False)
+        
 
        #print(self.val_df)
             

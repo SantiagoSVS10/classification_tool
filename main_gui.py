@@ -48,7 +48,7 @@ class ResultWidget(QtWidgets.QWidget):
         numbers_to_show = 3
         '''put metrics in labels'''
         self.acc_label.setText("    "+str(round(self.experiment.accuracy,numbers_to_show)))
-        self.precition_label.setText("    "+str(round(self.experiment.precition,numbers_to_show)))
+        self.precition_label.setText("    "+str(round(self.experiment.precision,numbers_to_show)))
         self.recall_label.setText("    "+str(round(self.experiment.recall,numbers_to_show)))
         self.f1_label.setText("    "+str(round(self.experiment.f1,numbers_to_show)))
         self.auc_label.setText("    "+str(round(self.experiment.auc,numbers_to_show)))
@@ -104,6 +104,8 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__()
         loadUi('gui/main_window.ui', self)
         self.R_bot_frame.hide()
+        self.comboOrganizer.setEnabled(False)
+        self.train_status_label.setText("Not training")
         self.dataset_names=self.get_dataset_names()
         self.result_names=self.get_result_names()
         self.put_datasets_in_train_toolbox()
@@ -116,6 +118,7 @@ class MainWindow(QMainWindow):
         self.distribution_button.clicked.connect(self.make_new_distribution_gui)
         self.toolBox.currentChanged.connect(self.change_between_train_and_analyse)
         
+        self.comboOrganizer.currentIndexChanged.connect(self.get_checked_experiments)
         self.write_params_in_items()
         self.show()
 
@@ -155,13 +158,14 @@ class MainWindow(QMainWindow):
                 experiment_path=join(self.results_path,self.current_result.result_name,self.qt_experiments_list.item(i).text())
                 self.checked_experiments.append(experiment_path)
         # print(self.checked_experiments)
-        
-        self.current_result.make_results_dataframe(self.checked_experiments)
+        sort_by=self.comboOrganizer.currentText()
+        self.current_result.make_results_dataframe(self.checked_experiments,sort_by)
   
         
         self.clean_layout(self.val_results_layout)
         self.clean_layout(self.test_results_layout)
         if len(self.checked_experiments)>0: 
+            self.comboOrganizer.setEnabled(True)
             self.current_result.val_df.apply(self.put_widgets_by_dataframe,axis=1,args=(self.val_results_layout,))
             self.current_result.test_df.apply(self.put_widgets_by_dataframe,axis=1,args=(self.test_results_layout,))
 
@@ -185,22 +189,27 @@ class MainWindow(QMainWindow):
     def start_training_thread(self):
         """Start the training thread"""
         self.train_progress.setValue(0)
+        self.train_status_label.setText("Training...")
+        self.train_button.setEnabled(False)
         self.training_thread = TrainingThread(self.current_dataset,self.selected_dataset_name,self.params)
         self.training_thread.start()
         '''wait for the thread to finish'''
         self.training_thread.finished.connect(self.test_model)
-        print('finished training thread')
-
 
     def test_model(self):
         """Test the model in the test and validation dataset"""
         '''use trainer object from the training thread'''
         self.train_progress.setValue(100)
         self.trainer=self.training_thread.trainer
-
+        self.train_status_label.setText("Testing...")
         self.trainer.plot_history()
         self.trainer.test_model_with_generator(self.current_dataset,'test')
         self.trainer.test_model_with_generator(self.current_dataset,'val')
+
+        self.result_names=self.get_result_names()
+        self.put_results_in_analyse_toolbox()
+        self.train_button.setEnabled(True)
+        self.train_status_label.setText("Training and Test finished!")
 
     # def start_training(self):
     #     """Start the training"""
@@ -208,11 +217,8 @@ class MainWindow(QMainWindow):
     #     trainer = ModelTrainer(self.selected_dataset_name,self.params)
     #     trainer.train(self.current_dataset,show_plots=False)
 
-    def star_thread_code(self):
-        self.thread_code=CodeThread(  )
-        self.thread_code.start()
-
     def write_params_in_items(self):
+        self.model_combobox.setCurrentText(self.params.model)
         self.batch_entry.setText(str(self.params.batch_size))
         self.learning_rate_entry.setText(str(self.params.learning_rate))
         self.epochs_entry.setText(str(self.params.num_epochs))
@@ -229,15 +235,6 @@ class MainWindow(QMainWindow):
         self.params.image_width=int(self.width_entry.text())
         self.params.image_height=int(self.height_entry.text())
         self.params.channels=int(self.channels_entry.text())
-        self.params.save(self.params_path)
-
-    def save_new_params(self):
-        """ Save the new parameters in the params file"""
-        print(self.params.learning_rate)
-        print(self.params.batch_size)
-        self.params.learning_rate=0.0002
-        print(self.params.learning_rate)
-        print(self.params.batch_size)
         self.params.save(self.params_path)
 
     def display_image(self,path,label):
@@ -277,6 +274,8 @@ class MainWindow(QMainWindow):
             self.dataset_list.addItem(dataset)
     
     def put_results_in_analyse_toolbox(self):
+        '''clean the list'''
+        self.result_list.clear()
         """Put the results in the analyse toolbox"""
         for result in self.result_names:
             self.result_list.addItem(result)
@@ -286,10 +285,11 @@ class MainWindow(QMainWindow):
         if self.toolBox.currentWidget()==self.train_toolbox:
             self.R_up_frame.show()
             self.R_bot_frame.hide()
+            self.comboOrganizer.setEnabled(False)
         else:
             self.R_up_frame.hide()
             self.R_bot_frame.show()
-
+            
     def get_dataset_names(self):
         """Get the names of the datasets in the datasets folder"""
         dataset_names = os.listdir(self.datasets_path)
@@ -299,14 +299,6 @@ class MainWindow(QMainWindow):
         """Get the names of the results in the results folder"""
         result_names = os.listdir(self.results_path)
         return result_names
-
-    '''detect actualization of file in a folder'''
-    def run_code_in_thread(self):
-        """Run the code in a thread"""
-        self.thread = CodeThread(self)
-        self.thread.start()
-
-    
 
 '''class to run training in a thread'''
 class TrainingThread(QThread):

@@ -108,9 +108,9 @@ class ModelTrainer(object):
         
         '''get metrics'''
         accuracy=accuracy_score(y_true,y_pred)
-        precition=precision_score(y_true,y_pred,zero_division=0)
-        recall=recall_score(y_true,y_pred)
-        f1=f1_score(y_true,y_pred,zero_division=0)
+        precision=precision_score(y_true,y_pred,zero_division=1)
+        recall=recall_score(y_true,y_pred,zero_division=1)
+        f1=f1_score(y_true,y_pred,zero_division=1)
         auc=roc_auc_score(y_true,y_pred)
         matrix_confusion = (confusion_matrix(y_true, y_pred))
         FP=matrix_confusion[0][1]
@@ -120,7 +120,7 @@ class ModelTrainer(object):
 
         '''make csv with metrics'''
         metrics_df = pd.DataFrame({'accuracy':accuracy,
-                                      'precition':precition,
+                                      'precision':precision,
                                       'recall':recall,
                                       'f1':f1,
                                       'auc':auc,
@@ -132,7 +132,7 @@ class ModelTrainer(object):
 
         '''print metrics'''
         print('Accuracy: ',accuracy)
-        print('Precision: ',precition)
+        print('Precision: ',precision)
         print('Recall: ',recall)
         print('F1: ',f1)
         print('AUC: ',auc)
