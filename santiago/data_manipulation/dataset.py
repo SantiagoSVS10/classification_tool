@@ -2,6 +2,7 @@ from os.path import join
 from santiago.data_manipulation.data_generator import DataGenerator
 
 import matplotlib.pyplot as plt
+import tensorflow as tf
 import seaborn as sns
 import pandas as pd
 import numpy as np
@@ -199,12 +200,32 @@ class Dataset_initializer():
                         '''delete corrupted image'''
                         os.remove(join(self.dataset_path,set,class_name,image))
                         print(f'Image {image} is corrupted and was deleted!')
+    @staticmethod
+    def generate(path,params,shuffle=False):
+        image_size = (params.image_height,params.image_width)
+        #generated = tf.keras.preprocessing.image_dataset_from_directory(
+        generated= tf.keras.preprocessing.image.ImageDataGenerator().flow_from_directory(
+        path,
+        #labels="inferred",
+        #label_mode="binary", #categorical
+        #class_names=classes,
+        #image_size=image_size,
+        shuffle=shuffle,
+        seed=123,
+        batch_size=params.batch_size,
 
-
+        target_size=image_size,
+        class_mode='binary',
+    )
+        return generated
+        
     def create_data_generators(self):
         """ Create the data generators for train, validation and test"""
         #self.verify_images_integrity()
-        self.train_generator = DataGenerator.generate(self.train_path,self.classes,self.params,shuffle=True)
-        self.val_generator = DataGenerator.generate(self.val_path,self.classes,self.params)
-        self.test_generator = DataGenerator.generate(self.test_path,self.classes,self.params)
+        self.train_generator = self.generate(self.train_path,self.params,shuffle=True)
+        
+        self.val_generator = self.generate(self.val_path,self.params)
+        
+        self.test_generator = self.generate(self.test_path,self.params)
+        
         print('Data generators created!')

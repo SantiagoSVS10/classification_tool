@@ -6,7 +6,7 @@ from classification_models.tfkeras import Classifiers
 import efficientnet.tfkeras as efn
 
 
-class ModelManager(object):
+class ModelManager():
     """
     Class manager for diferent classification models 
     """
@@ -16,17 +16,18 @@ class ModelManager(object):
                        for i in range(8)]  # EfficientNetB0 --> EfficientNetB7
     __default_network__ = 'EfficientNetB0'  # should be in the efn library
 
-    def __init__():
-        pass
-
-    @staticmethod
+    def __init__(self,params):
+        self.hparams = params
+        
+        
+    #@staticmethod
     def load_model(hparams, path):
         model = ModelManager.create_model(hparams)
         model.load_weights(path)
         return model
 
-    @staticmethod
-    def create_model(hparams):
+    #@staticmethod
+    def create_model(self):
         '''method to call the appropiate model creation according to hparams configuration file'''
         model_type = None
 
@@ -40,29 +41,29 @@ class ModelManager(object):
         }
 
         # Check if suppported by Effn library
-        if(hparams.model.lower() in map(str.lower, ModelManager.__effn_models__)):
+        if(self.hparams.model.lower() in map(str.lower, ModelManager.__effn_models__)):
             model_type = 'effn_model'
 
         # Check if suppported classification models library
-        if(hparams.model.lower() in map(str.lower, ModelManager.__classification_models__)):
+        if(self.hparams.model.lower() in map(str.lower, ModelManager.__classification_models__)):
             model_type = 'cls_model'
 
-        if(hparams.model == 'custom_model'):
+        if(self.hparams.model == 'custom_model'):
             model_type = 'custom_model'
 
         model = None
         try:
             if(model_type in switch):
-                model = switch[model_type](hparams)
+                model = switch[model_type](self.hparams)
         except Exception as e:
             traceback.print_exc()
             model = None
 
         if(model is None):
-            hparams.model = ModelManager.__default_network__
-            model = switch['effn_model'](hparams)
+            self.hparams.model = ModelManager.__default_network__
+            model = switch['effn_model'](self.hparams)
 
-        return model
+        self.model=model
 
     # ---------------------------------------------------------------------------- #
     #                         functions for model creation                         #

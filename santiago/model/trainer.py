@@ -14,21 +14,23 @@ import numpy as np
 import tensorflow as tf
 import time
 import os
-class ModelTrainer(object):
+class ModelTrainer():
     """
     Manage the models, compiles, show summary and train the model
     """
     def __init__(self,dataset_name, params):
         self.params = params
         self.dataset_name = dataset_name
-        self.model = self.create_model_architecture()
+        self.create_model_architecture()
         self.experiments_result_folder=join('data/results',self.dataset_name)
         self.define_namespace()
         self.callbacks_list = []
 
     def create_model_architecture(self):
-        model = ModelManager.create_model(self.params)
-        return model
+        self.model_manager = ModelManager(self.params)
+        self.model_manager.create_model()
+        self.model=self.model_manager.model
+        
 
     def compile_model(self):
         self.model.compile(loss=self.params.loss,
@@ -140,17 +142,20 @@ class ModelTrainer(object):
         print('False Negative: ',FN)
         print('True Positive: ',TP)
         print('True Negative: ',TN)
-        
-        report = classification_report(y_true, y_pred, target_names=dataset.classes,digits=3,output_dict=True)
-        
-        '''delete keys that are not classes'''
-        del report['accuracy']
-        del report['macro avg']
-        del report['weighted avg']
 
-        '''save csv with metrics'''
-
-        self.make_csv(save_path,filepaths,y_true,y_pred)
+        '''make list of FP,FN,TP,TN with y_true and y_pred'''
+        classification=[]
+        for i in range(len(y_true)):
+            if y_true[i]==0 and y_pred[i]==0:
+                classification.append('TN')
+            elif y_true[i]==0 and y_pred[i]==1:
+                classification.append('FP')
+            elif y_true[i]==1 and y_pred[i]==0:
+                classification.append('FN')
+            elif y_true[i]==1 and y_pred[i]==1:
+                classification.append('TP')
+        '''make csv with y_true,y_pred and classification'''
+        self.make_csv(save_path,filepaths,y_true,y_pred,classification)
 
         plt.close()
         plt.figure(figsize=(10, 10))
@@ -164,11 +169,13 @@ class ModelTrainer(object):
         
     def make_metrics_csv(self,save_path,metrics):
         pass
-    def make_csv(self,save_path,filenames,y_true,y_pred):
+    def make_csv(self,save_path,filenames,y_true,y_pred,classification):
         batch_csv=pd.DataFrame()
         batch_csv['filename'] = pd.Series(filenames)
         batch_csv['y_true'] = pd.Series(y_true)
         batch_csv['y_pred'] = pd.Series(y_pred)
+        batch_csv['classification'] = pd.Series(classification)
+
         batch_csv.to_csv(join(save_path,'classificated_images.csv'),index=False)
 
     '''function to calculate TP,FP,TN,FN'''

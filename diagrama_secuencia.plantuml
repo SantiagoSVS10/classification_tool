@@ -1,0 +1,48 @@
+@startuml classification_tool
+    MainWindow --> Params: json_path
+    Params --> Params: update(json_path)
+    Params --> MainWindow: params
+
+    MainWindow --> Dataset_initializer: init(Dataset_name,params)
+    MainWindow --> Dataset_initializer: create_distribution(percentages)
+    Dataset_initializer --> MainWindow
+    MainWindow --> Dataset_initializer: create_data_generators
+    Dataset_initializer --> MainWindow
+
+    MainWindow --> Trainer: init(dataset_name, params)
+    Trainer --> Trainer: define_space()
+    Trainer --> ModelManager: init(params)
+    Trainer --> ModelManager: create_model()
+    ModelManager --> Trainer: model
+
+    MainWindow --> Trainer: train()
+    Trainer --> Trainer: create_callbacks()
+    Trainer --> Trainer: compile_model()
+    Trainer --> Trainer: fit_model()
+    Trainer --> Trainer: save_plots()
+    Trainer --> MainWindow: plot_learning_curves()
+    MainWindow --> Trainer: test_model(val_generator)
+    MainWindow --> Trainer: test_model(test_generator) 
+    Trainer --> Trainer: accuracy_score()
+    Trainer --> Trainer: precision_score()
+    Trainer --> Trainer: recall_score()
+    Trainer --> Trainer: f1_score()
+    Trainer --> Trainer: roc_auc_score()
+    Trainer --> Trainer: plot_confusion_matrix()
+    Trainer --> Trainer: plot_precision_recall_curves()
+    Trainer --> Trainer: plot_roc_auc_curves()
+
+    MainWindow --> Results: init(selected_result_name)
+    Results --> MainWindow: results_folder
+    MainWindow --> MainWindow: get_checked_experiments()
+    MainWindow --> Results: make_experiments_dataframe(checked_experiments)
+    MainWindow --> Results: get_widgets()
+
+    Results --> ResultWidget: init(experiments_dataframe)
+    ResultWidget --> ResultWidget: put_metrics_in_widget()
+    ResultWidget --> ResultWidget: display_graphs_in_widget()
+    ResultWidget --> Results: widgetList
+    Results --> MainWindow: WidgetList
+    MainWindow --> MainWindow: put_widgets(WidgetList)
+@enduml
+

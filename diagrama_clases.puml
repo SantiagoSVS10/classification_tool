@@ -1,0 +1,47 @@
+@startuml classification_tool.png
+title Classification Tool
+skinparam classAttributeIconSize 0
+class MainWindow{
+    datasets_path
+    results_path
+    gui_images_path
+    params_path
+    params
+
+    select_dataset_from_list()
+    select_result_from_list()
+    put_experiments_in_experiments_list()
+    get_checked_experiments()
+    put_widgets()
+    clean_layout()
+    make_new_distribution_gui()
+    start_training()
+    test_model()
+    write_params_in_items()
+    save_params_from_entries()
+    display_image()
+    clean_display()
+    put_datasets_in_train_toolbox()
+    put_results_in_analyse_toolbox()
+    change_between_train_and_analyse()
+    get_dataset_names()
+    get_result_names()
+
+}
+class Params{}
+class Dataset_initializer{
+    hola
+    hola()
+}
+class Trainer{}
+class ModelManager{}
+class Results{}
+class ResultWidget{}
+
+MainWindow *-- Params
+MainWindow *-- Dataset_initializer
+MainWindow *-- Trainer
+Trainer *-- ModelManager
+MainWindow *-- Results
+Results *-- ResultWidget
+@enduml
