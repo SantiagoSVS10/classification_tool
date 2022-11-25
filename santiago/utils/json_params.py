@@ -18,16 +18,17 @@ class Params():
     """
 
     def __init__(self, json_path):
-        self.update(json_path)
+        self.json_path = json_path
+        self.update()
 
     def save(self, json_path):
         """Saves parameters to json file"""
         with open(json_path, 'w') as f:
             json.dump(self.__dict__, f, indent=4)
 
-    def update(self, json_path):
+    def update(self):
         """Loads parameters from json file"""
-        with open(json_path) as f:
+        with open(self.json_path) as f:
             params = json.load(f)
             self.__dict__.update(params)
 

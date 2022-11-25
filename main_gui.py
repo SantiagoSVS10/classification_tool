@@ -23,25 +23,30 @@ Allows to visualize the results, such as metrics, false positives and false nega
 
 """
 
-
-
 class MainWindow(QMainWindow):
     datasets_path = 'data/datasets'
     results_path = 'data/results'
     gui_images_path = 'gui/images'
     params_path='data/config/params.json'
     params=Params(params_path)
-
+    
     def __init__(self):
         super(MainWindow, self).__init__()
         loadUi('gui/main_window.ui', self)
         self.R_bot_frame.hide()
         self.comboOrganizer.setEnabled(False)
+        self.set_groupbox.setEnabled(False)
+        self.comboClassification.setVisible(False)
         self.train_status_label.setText("Not training")
         self.dataset_names=self.get_dataset_names()
         self.result_names=self.get_result_names()
+        '''put function to tabWidget'''
+        self.tabWidget.currentChanged.connect(self.tab_changed)
         self.put_datasets_in_train_toolbox()
         self.put_results_in_analyse_toolbox()
+        self.checked_set='Validation'
+        self.set_groupbox.children()[1].clicked.connect(self.get_checked_set)    
+        self.set_groupbox.children()[2].clicked.connect(self.get_checked_set)
         self.dataset_list.itemDoubleClicked.connect(self.select_dataset_from_list)
         self.result_list.itemDoubleClicked.connect(self.select_result_from_list)
         self.qt_experiments_list.itemChanged.connect(self.get_checked_experiments)
@@ -51,6 +56,7 @@ class MainWindow(QMainWindow):
         self.toolBox.currentChanged.connect(self.change_between_train_and_analyse)
         
         self.comboOrganizer.currentIndexChanged.connect(self.get_checked_experiments)
+        self.comboClassification.currentIndexChanged.connect(self.get_checked_experiments)
         self.write_params_in_items()
         self.show()
 
@@ -82,6 +88,24 @@ class MainWindow(QMainWindow):
             new_experiment_item.setCheckState(QtCore.Qt.Unchecked)
             self.qt_experiments_list.addItem(new_experiment_item)
 
+    def tab_changed(self):
+        '''clean layout when changing tab'''
+        if self.tabWidget.currentIndex()==1:
+            self.label.setText("Filter:")
+            self.comboClassification.setVisible(True)
+            self.comboOrganizer.setVisible(False)
+        elif self.tabWidget.currentIndex()==0:
+            self.label.setText("Organize experiments by:")
+            self.comboClassification.setVisible(False)
+            self.comboOrganizer.setVisible(True)
+
+    def get_checked_set(self):
+        '''get checked item in groupbox by children'''
+        for i in range(self.set_groupbox.layout().count()):
+            if self.set_groupbox.layout().itemAt(i).widget().isChecked():
+                self.checked_set=self.set_groupbox.layout().itemAt(i).widget().text()
+        self.get_checked_experiments()
+        
     def get_checked_experiments(self):
         """Get the checked experiments"""
         self.checked_experiments=[]
@@ -89,25 +113,41 @@ class MainWindow(QMainWindow):
             if self.qt_experiments_list.item(i).checkState()==2:       
                 experiment_path=join(self.results_path,self.current_result.result_name,self.qt_experiments_list.item(i).text())
                 self.checked_experiments.append(experiment_path)
-        # print(self.checked_experiments)
+
         sort_by=self.comboOrganizer.currentText()
-        self.current_result.make_results_dataframe(self.checked_experiments,sort_by)
+        filter=self.comboClassification.currentText()
         self.clean_layout(self.val_results_layout)
-        self.clean_layout(self.test_results_layout)
+        self.clean_layout(self.h_lay_images) 
+        self.current_result.make_results_dataframe(self.checked_experiments,sort_by)
+        
         self.current_result.get_widgets()
         self.put_widgets()
+    
+        self.current_result.get_images_widgets(filter,self.checked_set)
+        self.put_individual_images()
+
         if len(self.checked_experiments)>0: 
             self.comboOrganizer.setEnabled(True)
+            self.set_groupbox.setEnabled(True)
             
-
-    # def put_widgets_by_dataframe(self,experiment,layout):
-    #     new_result_widget=ResultWidget(experiment)
-    #     layout.addWidget(new_result_widget)
     def put_widgets(self):
-        for widget in self.current_result.val_widget_list:
-            self.val_results_layout.addWidget(widget)
-        for widget in self.current_result.test_widget_list:
-            self.test_results_layout.addWidget(widget)
+        if self.checked_set=='Validation':
+            for widget in self.current_result.val_widget_list:
+                self.val_results_layout.addWidget(widget)
+        elif self.checked_set=='Test':
+            for widget in self.current_result.test_widget_list:
+                self.val_results_layout.addWidget(widget)
+    
+    def put_individual_images(self):
+        '''create a vertical layout for each checked experiment'''
+        for widget in self.current_result.image_widgets:
+            '''creake vertical layout'''
+            self.h_lay_images.addWidget(widget)
+
+    def clean_images_layout(self,layout):
+        for i in reversed(range(layout.count())): 
+            layout.itemAt(i).layout().deleteLater()
+
     def clean_layout(self,layout):
         for i in reversed(range(layout.count())): 
             layout.itemAt(i).widget().setParent(None)
@@ -235,63 +275,6 @@ class MainWindow(QMainWindow):
         result_names = os.listdir(self.results_path)
         return result_names
 
-# '''create class for result widget'''
-# class ResultWidget(QtWidgets.QWidget):
-#     def __init__(self,experiment):
-#         super(ResultWidget, self).__init__()
-#         loadUi('gui/result_widget.ui', self)
-#         self.experiment = experiment
-#         self.put_metrics_in_widget()
-#         self.display_graphs()
-        
-#     def put_metrics_in_widget(self):
-#         numbers_to_show = 3
-#         '''put metrics in labels'''
-#         self.acc_label.setText("    "+str(round(self.experiment.accuracy,numbers_to_show)))
-#         self.precition_label.setText("    "+str(round(self.experiment.precision,numbers_to_show)))
-#         self.recall_label.setText("    "+str(round(self.experiment.recall,numbers_to_show)))
-#         self.f1_label.setText("    "+str(round(self.experiment.f1,numbers_to_show)))
-#         self.auc_label.setText("    "+str(round(self.experiment.auc,numbers_to_show)))
-#         self.FP_label.setText("    "+str(self.experiment.FP))
-#         self.FN_label.setText("    "+str(self.experiment.FN))
-#         self.TP_label.setText("    "+str(self.experiment.TP))
-#         self.TN_label.setText("    "+str(self.experiment.TN))
-#         '''change title of groupbox'''
-#         experiment_name=self.experiment.experiment_path.split('\\')[-1]
-#         self.groupBox.setTitle(experiment_name)
-
-#     def display_graphs(self):
-#         '''display training and validation acc and loss'''
-#         acc_graph_path=join(self.experiment.experiment_path,'history_results','accuracy.png')
-#         loss_graph_path=join(self.experiment.experiment_path,'history_results','loss.png')
-#         self.display_image(acc_graph_path,self.acc_graph)
-#         self.display_image(loss_graph_path,self.loss_graph)
-
-#         '''display testmodel graphs'''
-#         matrix_graph_path=join(self.experiment.experiment_path,'metrics_evaluation',self.experiment.set,'confusion_matrix.png')
-#         pres_rec_graph_path=join(self.experiment.experiment_path,'metrics_evaluation',self.experiment.set,'precision_recall_curve.png')
-#         roc_graph_path=join(self.experiment.experiment_path,'metrics_evaluation',self.experiment.set,'roc_auc_curve.png')
-#         self.display_image(matrix_graph_path,self.matrix_graph)
-#         self.display_image(pres_rec_graph_path,self.pres_rec_graph)
-#         self.display_image(roc_graph_path,self.roc_auc_graph)
-
-
-#     def display_image(self,path,label):
-#         self.clean_display(label)
-#         image_profile = QtGui.QImage(path) #QImage object
-#         '''get shape of self.label'''
-#         width = label.width()
-#         height = label.height()
-    
-#         '''resize image to fit in self.label'''
-#         image_profile = image_profile.scaled(width, height, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)  
-#         label.setPixmap(QtGui.QPixmap.fromImage(image_profile)) 
-        
-#     def clean_display(self,label):
-#         """Clean the display"""
-#         label.setText('')
-#         '''delete pixmap from label'''
-#         label.setPixmap(QtGui.QPixmap(''))
 
 '''class to run training in a thread'''
 class TrainingThread(QThread):
@@ -312,8 +295,6 @@ class TrainingThread(QThread):
         
         self.exit()
 
-        
-
     def test_model(self):
         """Test the model in the test and validation dataset"""
         self.trainer.plot_history()
@@ -322,6 +303,7 @@ class TrainingThread(QThread):
         print('Finished!!')
         #window.train_progress.setValue(100)
 
+'''Initialize the app'''
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     window = MainWindow()

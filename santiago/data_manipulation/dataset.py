@@ -24,7 +24,6 @@ class Dataset_initializer():
         self.val_path=join(self.dataset_path,'val')
         self.test_path=join(self.dataset_path,'test')
         self.distributed=self.verify_distribution()
-        
         self.classes=self.get_classes()
         
     
@@ -58,6 +57,7 @@ class Dataset_initializer():
         print(f'Dataset {self.dataset_name} prepared!')
         # self.plot_current_training_distribution()
     
+
     def create_new_distribution(self,train_percentage=0.8,val_percentage=0.1,test_percentage=0.1):
         """ Create a new distribution of the dataset in train, validation and test folders"""
         if math.fsum([train_percentage,val_percentage,test_percentage])!=1.0:
@@ -76,6 +76,7 @@ class Dataset_initializer():
         print('Creating new distribution..')
         self.create_distribution(train_percentage,val_percentage,test_percentage)
 
+    '''distrubute images of classes in train, val and test folders'''
     def distribute_images(self):
         """ Copy the images in train, validation and test folders"""
         print(self.distributed_class_files)
@@ -98,7 +99,7 @@ class Dataset_initializer():
                 if not os.path.exists(join(self.test_path,class_name,files_in_class[i])): 
                     shutil.copy(join(class_path,files_in_class[i]),join(self.test_path,class_name,files_in_class[i]))
             
-
+    '''create folder for each class in train, val and test folders'''
     def create_class_folders(self):
         """ Create folders of each class inside train, validation and test"""
         for class_name in self.distributed_class_files:
@@ -112,7 +113,7 @@ class Dataset_initializer():
             if not os.path.exists(class_test_path):
                 os.mkdir(class_test_path)
                     
-        
+    '''create folders for train, validation and test'''
     def create_train_val_test_folders(self):
         """ Create the folders train, validation and test"""
         if not os.path.exists(self.train_path):
@@ -122,12 +123,14 @@ class Dataset_initializer():
         if not os.path.exists(self.test_path):
             os.mkdir(self.test_path)
 
+    '''get the classes considering the folders of dataset'''
     def get_classes(self):
-        listdir=os.listdir(self.dataset_path)
-        if os.path.exists(self.train_path) or os.path.exists(self.val_path) or os.path.exists(self.test_path):
-            listdir.remove('val')
-            listdir.remove('test')
-            listdir.remove('train')
+        
+        if os.path.exists(self.train_path):
+            listdir=os.listdir(join(self.dataset_path,'train'))
+        else:
+            listdir=os.listdir(self.dataset_path)
+        print(listdir)
         return listdir
 
 

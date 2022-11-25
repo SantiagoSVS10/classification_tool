@@ -8,35 +8,87 @@ class MainWindow{
     params_path
     params
 
+    
+    
+    put_experiments_in_experiments_list()
+    change_between_train_and_analyse()
+    put_results_in_analyse_toolbox()
+    put_datasets_in_train_toolbox()
+    make_new_distribution_gui()
+    save_params_from_entries()
+    get_checked_experiments()
     select_dataset_from_list()
     select_result_from_list()
-    put_experiments_in_experiments_list()
-    get_checked_experiments()
-    put_widgets()
-    clean_layout()
-    make_new_distribution_gui()
-    start_training()
-    test_model()
     write_params_in_items()
-    save_params_from_entries()
-    display_image()
-    clean_display()
-    put_datasets_in_train_toolbox()
-    put_results_in_analyse_toolbox()
-    change_between_train_and_analyse()
     get_dataset_names()
     get_result_names()
+    start_training()
+    display_image()
+    clean_display()
+    clean_layout()
+    put_widgets()
+    test_model()
+}
 
+class Params{
+    params_path
+    
+    update()
+    save()
 }
-class Params{}
+
 class Dataset_initializer{
-    hola
-    hola()
+    train_path
+    test_path
+    val_path
+
+    plot_current_training_distribution()
+    create_data_generators()
+    create_distribution()
+    verify_distribution()
+    distribute_images()
+    get_classes()
+        
 }
-class Trainer{}
-class ModelManager{}
-class Results{}
-class ResultWidget{}
+class Trainer{
+    experiments_result_folder
+    callback_list
+
+    create_model_architecture()
+    test_model_with_generator()
+    precision_recall_curves()
+    calculate_TP_FP_TN_FN()
+    make_metrics_csv()
+    define_namespace()
+    create_callbacks()
+    roc_auc_curves()
+    compile_model()
+    plot_history()
+    train()
+}
+class ModelManager{
+    params
+
+    create_custom_model()
+    create_effn_model()
+    create_cls_model()
+    create_model()
+    load_model()
+}
+class Results{
+    result_name
+    make_results_dataframe()
+    get_results_folders()
+    get_widgets()
+}
+class ResultWidget{
+    experiment
+
+    put_metrics_in_widget()
+    display_graphs()
+    display_image()
+    clean_display()
+}
 
 MainWindow *-- Params
 MainWindow *-- Dataset_initializer
