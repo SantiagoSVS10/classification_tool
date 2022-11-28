@@ -1,14 +1,21 @@
 
-from os.path import join
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.uic import loadUi
+from os.path import join
 import pandas as pd
+import subprocess
 import os
+
+'''This class is used to create the result widgets.
+Allows to show the results of the training and the classification.
+Shows the confusion matrix and the classification report.
+Show individual images separated by False Positives, False Negatives, True Positives and True Negatives.'''
+
 class Results():
     results_path = 'data/results'
     def __init__(self,result_name):
         self.result_name = result_name
-
+        self.gray_image_path = 'gui/images/gray_image.png'
     def get_results_folders(self):
         '''get the folders inside results path'''
         self.all_experiment_list = os.listdir(join(self.results_path,self.result_name))
@@ -50,11 +57,7 @@ class Results():
         self.val_df = pd.concat(val_df_list)
         self.test_df = pd.concat(test_df_list)
         self.val_df.sort_values(by=sort_by,inplace=True,ascending=False)
-        self.test_df.sort_values(by=sort_by,inplace=True,ascending=False)
-        
-        # self.val_images=pd.concat(val_images_df_list)
-        # self.test_images=pd.concat(test_images_df_list)
-        
+        self.test_df.sort_values(by=sort_by,inplace=True,ascending=False)       
    
     def get_widgets(self):
         self.val_widget_list = []
@@ -74,23 +77,39 @@ class Results():
             image_df=image_df[image_df['classification']==filter]
             if len(image_df)<1:
                 return
-            image_df=image_df[0:10]
+            imgs_to_show=10
+            image_df=image_df[0:imgs_to_show]
             images_widget=QtWidgets.QWidget()
             v_lay=QtWidgets.QVBoxLayout()
             '''put elements in top of the layout'''
             v_lay.setAlignment(QtCore.Qt.AlignTop)
             title=QtWidgets.QLabel(image_df.iloc[0].experiment_path.split('\\')[-1])
+            '''make title bold and bigger'''
+            font = QtGui.QFont();            font.setBold(True);            font.setPointSize(14);            title.setFont(font)
             v_lay.addWidget(title)
-            for i in range(len(image_df)):
+            for i in range(imgs_to_show):
                 image_label=QtWidgets.QLabel()
-                v_lay.addWidget(image_label)                
-                self.display_image(image_df.iloc[i].filename,image_label)
-                v_lay.addSpacerItem(QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Expanding))
-                images_widget.setLayout(v_lay)
-                '''add spacer to widget'''
-                
+                v_lay.addWidget(image_label)   
+                try:             
+                    self.display_image(image_df.iloc[i].filename,image_label)
+                    '''make image_label clickable to call call_from_shell'''
+                    image_label.mousePressEvent = lambda event, image_path=image_df.iloc[i].filename: os.startfile(image_path[:-len(image_path.split('\\')[-1])])
+                    '''add non editable text entry'''
+                    text_entry=QtWidgets.QLineEdit(image_df.iloc[i].filename.split('\\')[-1])
+                    text_entry.setReadOnly(True)
+                    v_lay.addWidget(text_entry)
 
+                except:
+                    self.display_image(self.gray_image_path,image_label)
+                v_lay.addSpacerItem(QtWidgets.QSpacerItem(40, 40, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding))
+                images_widget.setLayout(v_lay)
+                
             self.image_widgets.append(images_widget)
+
+    @staticmethod
+    def open_folder(folder):
+        '''open folder in windows explorer'''
+        os.startfile(folder)
 
     def display_image(self,path,label):
         self.clean_display(label)
