@@ -66,6 +66,7 @@ class MainWindow(QMainWindow):
         
         self.current_dataset=Dataset_initializer(self.selected_dataset_name,self.params)
         plt.close('all')
+        self.current_dataset.create_distribution_dataframe()
         self.distributed()
     
     def select_result_from_list(self):
@@ -229,19 +230,26 @@ class MainWindow(QMainWindow):
         '''delete pixmap from label'''
         label.setPixmap(QtGui.QPixmap(''))
 
+
     def distributed(self):
         """Check if the current dataset is distributed"""
-        self.verified_current_dataset=(self.current_dataset.verify_distribution())
-        if self.verified_current_dataset==True:
+        
+        if self.current_dataset.distributed=='folders':
             self.train_button.setEnabled(True)
             self.distribution_status.setText('Distributed')
             self.current_dataset.plot_current_training_distribution()
             self.display_image('gui/images/current_training_distribution.png',self.distribution_label)
+        elif self.current_dataset.distributed=='dataframe':
+            
+            self.current_dataset.plot_current_training_distribution_dataframe()
+            self.display_image('gui/images/current_training_distribution.png',self.distribution_label)
+            self.train_button.setEnabled(True)
+            self.distribution_status.setText('Distributed')
         else:
             self.train_button.setEnabled(False)
             self.clean_display(self.distribution_label)
             self.distribution_status.setText('Not Distributed')
-        return self.verified_current_dataset
+        
 
     def put_datasets_in_train_toolbox(self):
         """Put the datasets in the train toolbox"""

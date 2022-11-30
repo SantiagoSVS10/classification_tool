@@ -5,7 +5,7 @@
     "optimizer": "Adam",
     "loss": "binary_crossentropy",
     "batch_size": 64,
-    "num_epochs": 6,
+    "num_epochs": 10,
     "learning_rate": 0.001,
     "image_height": 128,
     "image_width": 128,

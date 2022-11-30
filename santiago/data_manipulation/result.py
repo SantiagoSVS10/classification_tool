@@ -3,7 +3,6 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.uic import loadUi
 from os.path import join
 import pandas as pd
-import subprocess
 import os
 
 '''This class is used to create the result widgets.
@@ -84,7 +83,7 @@ class Results():
             '''put elements in top of the layout'''
             v_lay.setAlignment(QtCore.Qt.AlignTop)
             title=QtWidgets.QLabel(image_df.iloc[0].experiment_path.split('\\')[-1])
-            '''make title bold and bigger'''
+            '''make experiment title bold and bigger'''
             font = QtGui.QFont();            font.setBold(True);            font.setPointSize(14);            title.setFont(font)
             v_lay.addWidget(title)
             for i in range(imgs_to_show):
@@ -92,11 +91,13 @@ class Results():
                 v_lay.addWidget(image_label)   
                 try:             
                     self.display_image(image_df.iloc[i].filename,image_label)
-                    '''make image_label clickable to call call_from_shell'''
+                    '''make image_label clickable to execute command from shell'''
                     image_label.mousePressEvent = lambda event, image_path=image_df.iloc[i].filename: os.startfile(image_path[:-len(image_path.split('\\')[-1])])
                     '''add non editable text entry'''
                     text_entry=QtWidgets.QLineEdit(image_df.iloc[i].filename.split('\\')[-1])
                     text_entry.setReadOnly(True)
+                    '''copy image name to clipboard'''
+                    text_entry.mousePressEvent = lambda event, text=image_df.iloc[i].filename: QtWidgets.QApplication.clipboard().setText(text.split('\\')[-1])
                     v_lay.addWidget(text_entry)
 
                 except:

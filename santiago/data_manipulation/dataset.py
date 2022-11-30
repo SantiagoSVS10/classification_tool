@@ -1,5 +1,7 @@
-from os.path import join
+
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from santiago.data_manipulation.data_generator import DataGenerator
+from os.path import join
 
 import matplotlib.pyplot as plt
 import tensorflow as tf
@@ -23,8 +25,13 @@ class Dataset_initializer():
         self.train_path=join(self.dataset_path,'train')
         self.val_path=join(self.dataset_path,'val')
         self.test_path=join(self.dataset_path,'test')
-        self.distributed=self.verify_distribution()
+        self.train_dataframe=pd.DataFrame()
+        self.val_dataframe=pd.DataFrame()
+        self.test_dataframe=pd.DataFrame()
+
         self.classes=self.get_classes()
+        self.distributed=self.verify_distribution()
+        
         
     
     def create_distribution(self,train_percentage=0.8,val_percentage=0.1,test_percentage=0.1):
@@ -32,10 +39,6 @@ class Dataset_initializer():
         
         if math.fsum([train_percentage,val_percentage,test_percentage])!=1.0:
             print('The percentages must sum 1')
-            return
-
-        if self.distributed==True:
-            #print('The dataset is already distributed')
             return
 
         self.distributed_class_files = {}
@@ -50,31 +53,62 @@ class Dataset_initializer():
             self.distributed_class_files[class_name] = list([files_in_class,train_images_count,val_images_count,test_images_count])
 
         self.create_train_val_test_folders()
-        #self.verify_distribution(train_images_count,val_images_count,test_images_count)
         self.create_class_folders()
         self.distribute_images()
         self.distributed=True
         print(f'Dataset {self.dataset_name} prepared!')
         # self.plot_current_training_distribution()
     
+    def create_distribution_dataframe(self,train_percentage=0.7,val_percentage=0.2,test_percentage=0.1):
+        
+        if math.fsum([train_percentage,val_percentage,test_percentage])!=1.0:
+            print('The percentage must sum 1')
+            return
+
+        for classe in self.classes:
+            '''get filenames of each class'''
+            class_path = join(self.dataset_path,classe)
+            files_in_class = os.listdir(class_path)
+            '''convert to absolute path'''
+            files_in_class = [join(class_path,file) for file in files_in_class]
+            '''create dataframe of each class'''
+            class_dataframe = pd.DataFrame(files_in_class,columns=['filename'])
+            class_dataframe['class']=classe
+            '''add dataframe to the dataset dataframe'''
+            self.train_dataframe = self.train_dataframe.append(class_dataframe[:math.floor(len(files_in_class)*train_percentage)])
+            self.val_dataframe = self.val_dataframe.append(class_dataframe[math.floor(len(files_in_class)*train_percentage):math.floor(len(files_in_class)*(train_percentage+val_percentage))])
+            self.test_dataframe = self.test_dataframe.append(class_dataframe[math.floor(len(files_in_class)*(train_percentage+val_percentage)):])
+        self.distributed='dataframe'
+        print(f'Dataset {self.dataset_name} prepared by dataframe!')
+
 
     def create_new_distribution(self,train_percentage=0.8,val_percentage=0.1,test_percentage=0.1):
         """ Create a new distribution of the dataset in train, validation and test folders"""
         if math.fsum([train_percentage,val_percentage,test_percentage])!=1.0:
             print('The percentages must sum 1')
             return
-        self.distributed=False
+        
+        if self.distributed=='folders':
 
-        '''delete the old distribution'''
-        try:
-            shutil.rmtree(self.train_path)
-            shutil.rmtree(self.val_path)
-            shutil.rmtree(self.test_path)
-        except:
-            pass
-        '''create the new distribution'''
-        print('Creating new distribution..')
-        self.create_distribution(train_percentage,val_percentage,test_percentage)
+            '''delete the old distribution'''
+            try:
+                shutil.rmtree(self.train_path)
+                shutil.rmtree(self.val_path)
+                shutil.rmtree(self.test_path)
+            except:
+                pass
+            '''create the new distribution'''
+            print('Creating new distribution..')
+            self.create_distribution(train_percentage,val_percentage,test_percentage)
+
+        if self.distributed=='dataframe':
+            '''erase the old distribution'''
+            self.train_dataframe=pd.DataFrame()
+            self.val_dataframe=pd.DataFrame()
+            self.test_dataframe=pd.DataFrame()
+            print('hey')
+            self.create_distribution_dataframe(train_percentage,val_percentage,test_percentage)
+            
 
     '''distrubute images of classes in train, val and test folders'''
     def distribute_images(self):
@@ -138,11 +172,12 @@ class Dataset_initializer():
         """ Verify if the dataset has the folders train, validation and test"""
         if not os.path.exists(self.train_path) or not os.path.exists(self.val_path) or not os.path.exists(self.test_path):
             print(f'Dataset {self.dataset_name} needs to be prepared!')
-            return False
+            self.create_results_folder()
+            return 'dataframe'
         else:
             print(f'Dataset {self.dataset_name} is ready!')
             self.create_results_folder()
-            return True
+            return 'folders'
 
     def create_results_folder(self):
         '''create a folder with the name of current dataset inside results path'''
@@ -152,7 +187,42 @@ class Dataset_initializer():
         else:
             print('Results folder already exists!')
 
+    
+    def plot_current_training_distribution_dataframe(self):
+        """ Plot the current distribution of the train, validation and test dataframes"""
+        count=[]
+        for class_name in self.classes:
+            class_df = self.train_dataframe[self.train_dataframe['class']==class_name]
+            count.append(len(class_df))
+        for class_name in self.classes:
+            class_df = self.val_dataframe[self.val_dataframe['class']==class_name]
+            count.append(len(class_df))
+        for class_name in self.classes:
+            class_df = self.test_dataframe[self.test_dataframe['class']==class_name]
+            count.append(len(class_df))
+
+        classe=[]
+        classe=self.classes*3  
+        # print(set)
+        # print(count)
+        # print(classe)
+        # print(len(set),len(count),len(classe))
+        set=['train']*len(self.classes)+['val']*len(self.classes)+['test']*len(self.classes)
+        distribution_df = pd.DataFrame({'set':set,'count':count,'class':classe})
+        # print(distribution_df)
+        sns.set(rc={'figure.figsize':(9,4.5)})
+        barplot=sns.barplot(x='set', y='count', hue='class', data=distribution_df)
+        plt.title('Training distribution')
+        '''change font size of plot'''
+        for item in ([barplot.title, barplot.xaxis.label, barplot.yaxis.label] +
+                barplot.get_xticklabels() + barplot.get_yticklabels()):
+            item.set_fontsize(13)
+
+        barplot.figure.savefig(join(self.gui_images_path,'current_training_distribution.png'),bbox_inches='tight')
+        plt.close()
+        return barplot
         
+
 
     def plot_current_training_distribution(self):
         """ Plot the current distribution of the dataset in train, validation and test folders"""
@@ -168,7 +238,7 @@ class Dataset_initializer():
             count.append(len(os.listdir(join(self.val_path,class_name))))
         for class_name in self.classes:
             count.append(len(os.listdir(join(self.test_path,class_name))))
-
+        print(count)
         classe=[]
         classe=self.classes*3  
         # print(set)
@@ -176,7 +246,7 @@ class Dataset_initializer():
         # print(classe)
         # print(len(set),len(count),len(classe))
         distribution_df = pd.DataFrame({'set':set,'count':count,'class':classe})
-        # print(distribution_df)
+        print(distribution_df)
 
         sns.set(rc={'figure.figsize':(9,4.5)})
         barplot=sns.barplot(x='set', y='count', hue='class', data=distribution_df)
@@ -203,6 +273,28 @@ class Dataset_initializer():
                         '''delete corrupted image'''
                         os.remove(join(self.dataset_path,set,class_name,image))
                         print(f'Image {image} is corrupted and was deleted!')
+
+
+    '''function to create generator from dataframe'''
+    @staticmethod
+    def generator_dataframe(params,batch_size=1, df=None, shuffle=False):
+        gen = ImageDataGenerator(rescale=1./255)
+        """ Create a generator from dataframe"""
+        generator = gen.flow_from_dataframe(
+            x_col='filename',
+            y_col='class',
+            dataframe=df,
+            # directory="train",
+            class_mode='binary',
+            # classes=None,
+            color_mode='rgb',
+            batch_size=batch_size,
+            target_size=(params.image_height,params.image_width),
+            shuffle=shuffle,
+            seed=123)
+
+        return generator
+
     @staticmethod
     def generate(path,params,shuffle=False):
         image_size = (params.image_height,params.image_width)
@@ -225,10 +317,18 @@ class Dataset_initializer():
     def create_data_generators(self):
         """ Create the data generators for train, validation and test"""
         #self.verify_images_integrity()
-        self.train_generator = self.generate(self.train_path,self.params,shuffle=True)
-        
-        self.val_generator = self.generate(self.val_path,self.params)
-        
-        self.test_generator = self.generate(self.test_path,self.params)
-        
+        if self.distributed=='folders':
+            self.train_generator = self.generate(self.train_path,self.params,shuffle=True)
+            
+            self.val_generator = self.generate(self.val_path,self.params)
+            
+            self.test_generator = self.generate(self.test_path,self.params)
+
+        if self.distributed=='dataframe':
+            self.train_generator = self.generator_dataframe(self.params, df=self.train_dataframe, shuffle=True)
+            print(self.train_generator.filepaths)
+            self.val_generator = self.generator_dataframe(self.params, df=self.val_dataframe)
+
+            self.test_generator = self.generator_dataframe(self.params, df=self.test_dataframe)
+
         print('Data generators created!')
