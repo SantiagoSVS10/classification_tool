@@ -1,4 +1,4 @@
-data/datasets/
+data/datasets/*
 data/results/pets/pets_custom_model_2022_1025_1233/best_model/best_model.h5
 data/results/
 santiago/model/__pycache__/
