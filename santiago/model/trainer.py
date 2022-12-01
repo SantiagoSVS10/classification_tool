@@ -1,23 +1,23 @@
-from santiago.model.models import ModelManager
-from tensorflow.keras.callbacks import History, EarlyStopping, ModelCheckpoint, CSVLogger
+from sklearn.metrics import roc_curve, auc, roc_auc_score, precision_recall_curve, precision_score, recall_score, f1_score, accuracy_score
+from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, CSVLogger
 from santiago.utils.train_utils import PlotLearning,SavePlotLearning
+from sklearn.metrics import PrecisionRecallDisplay
+from santiago.model.models import ModelManager
+from sklearn.metrics import confusion_matrix
 from os.path import join,exists
-from sklearn.metrics import confusion_matrix, classification_report
-from sklearn.metrics import roc_curve, auc, roc_auc_score, precision_recall_curve, average_precision_score, precision_score, recall_score, f1_score, accuracy_score,PrecisionRecallDisplay
 
-import seaborn as sns
+
 import matplotlib.pyplot as plt
-plt.ioff()
-
+import seaborn as sns
 import pandas as pd
-import numpy as np
-import tensorflow as tf
 import time
 import os
+
+plt.ioff()
+'''This class is used to manage the models, compile, show summary and train the model'''
+
 class ModelTrainer():
-    """
-    Manage the models, compiles, show summary and train the model
-    """
+
     def __init__(self,dataset_name, params):
         self.params = params
         self.dataset_name = dataset_name
@@ -26,16 +26,19 @@ class ModelTrainer():
         self.define_namespace()
         self.callbacks_list = []
 
+    '''function to get the required model'''
     def create_model_architecture(self):
         self.model_manager = ModelManager(self.params)
         self.model_manager.create_model()
         self.model=self.model_manager.model
         
-
+    '''function to compile the model'''
     def compile_model(self):
         self.model.compile(loss=self.params.loss,
                            optimizer=self.params.optimizer,
                            metrics=['accuracy'])
+
+    '''function to create necessary folders and files to save metrics'''
     def define_namespace(self):
         '''create metrics folder inside self.experiment_result_folder'''
         self.experiment_folder=join(self.experiments_result_folder,self.dataset_name+"_"+self.params.model + time.strftime("_%Y_%m%d_%H%M"))
@@ -57,8 +60,6 @@ class ModelTrainer():
         if not exists(self.best_model_path):
             os.mkdir(self.best_model_path)
         
-
-        # Define filepaths with names
         self.h5_best_model_filepath = join(
             self.best_model_path, 'best_model.h5')
         self.history_training_csv_filepath = join(
@@ -66,7 +67,7 @@ class ModelTrainer():
         self.final_history_training_csv_filepath = join(
             self.history_training_path, 'final_training_history_log.csv')
 
-
+    '''function to train the model'''
     def train(self, dataset,window=None,show_plots=False,save_plots=False):
         self.create_callbacks(window,show_plots,save_plots)
         self.compile_model()
@@ -83,6 +84,7 @@ class ModelTrainer():
         history_df = pd.DataFrame(self.history.history)
         history_df.to_csv(self.final_history_training_csv_filepath, index=False)
 
+    '''function to test the model using data generators'''
     def test_model_with_generator(self,dataset,set_name):
         
         '''get y_true and y_pred'''
@@ -166,9 +168,7 @@ class ModelTrainer():
         plt.close()
         #cr=classification_report(true_categories, test_predictions, target_names=params.classes, digits=3,output_dict=True)
         
-        
-    def make_metrics_csv(self,save_path,metrics):
-        pass
+    '''function to make csv with y_true,y_pred and classification'''
     def make_csv(self,save_path,filenames,y_true,y_pred,classification):
         batch_csv=pd.DataFrame()
         batch_csv['filename'] = pd.Series(filenames)
@@ -195,6 +195,7 @@ class ModelTrainer():
                 FN+=1
         return TP,FP,TN,FN
 
+    '''function to plot the precision recall curves'''
     def precision_recall_curves(self,save_path,set_name,true_categories_tf,test_predictions_tf):
         plt.close()
         plt.figure(figsize=(10, 10))
@@ -215,6 +216,7 @@ class ModelTrainer():
         plt.savefig(join(save_path,"precision_recall_curve_2.png"),bbox_inches='tight')
         plt.close()
 
+    '''function to plot the ROC curves'''
     def roc_auc_curves(self,save_path,set_name,true_categories_tf,test_predictions_tf):
         plt.close()
         plt.figure(figsize=(10, 10))
@@ -230,6 +232,7 @@ class ModelTrainer():
         plt.legend(loc="lower right")
         plt.savefig(join(save_path,"roc_auc_curve.png"),bbox_inches='tight')
 
+    '''function to plot the loss and accuracy curves'''
     def plot_history(self):
 
         plt.close()
@@ -257,6 +260,7 @@ class ModelTrainer():
         plt.close()
         return acc_fig,loss_fig
 
+    '''function to create callbacks to be used during training'''
     def create_callbacks(self,window=None, show_learning_curves=False,save_plots=False):
         
         early_stop = EarlyStopping(monitor='val_loss', patience=3)

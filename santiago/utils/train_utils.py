@@ -7,6 +7,8 @@ import tensorflow as tf
 import warnings
 warnings.filterwarnings( "ignore", module = "matplotlib\..*" )
 
+'''This class is used to plot the loss and accuracy of the training.'''
+
 class PlotLearning(tf.keras.callbacks.Callback):
     def __init__(self):
         plt.rcParams["figure.figsize"]=15,7

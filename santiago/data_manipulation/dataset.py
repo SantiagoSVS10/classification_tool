@@ -12,6 +12,10 @@ import shutil
 import math
 import os
 
+'''This class is used to manage the datasets.
+Allows to distribute the images to create the train, validation and test data generators.
+Plots the distribution of the images in the datasets.
+Create all the necessary folders to save the results.'''
 
 class Dataset_initializer():
     datasets_path = 'data/datasets'
@@ -33,10 +37,9 @@ class Dataset_initializer():
         self.distributed=self.verify_distribution()
         
         
-    
+    '''create initial distribution for datasets with train,test and val folders'''
     def create_distribution(self,train_percentage=0.8,val_percentage=0.1,test_percentage=0.1):
-        """ Create the distribution of the dataset in train, validation and test folders"""
-        
+
         if math.fsum([train_percentage,val_percentage,test_percentage])!=1.0:
             print('The percentages must sum 1')
             return
@@ -57,8 +60,8 @@ class Dataset_initializer():
         self.distribute_images()
         self.distributed=True
         print(f'Dataset {self.dataset_name} prepared!')
-        # self.plot_current_training_distribution()
-    
+
+    '''create new distribution for dataframe with classes folders, using dataframe'''
     def create_distribution_dataframe(self,train_percentage=0.7,val_percentage=0.2,test_percentage=0.1):
         
         if math.fsum([train_percentage,val_percentage,test_percentage])!=1.0:
@@ -81,7 +84,7 @@ class Dataset_initializer():
         self.distributed='dataframe'
         print(f'Dataset {self.dataset_name} prepared by dataframe!')
 
-
+    '''create new distribution for datasets with train,test and val folders'''
     def create_new_distribution(self,train_percentage=0.8,val_percentage=0.1,test_percentage=0.1):
         """ Create a new distribution of the dataset in train, validation and test folders"""
         if math.fsum([train_percentage,val_percentage,test_percentage])!=1.0:
@@ -106,7 +109,6 @@ class Dataset_initializer():
             self.train_dataframe=pd.DataFrame()
             self.val_dataframe=pd.DataFrame()
             self.test_dataframe=pd.DataFrame()
-            print('hey')
             self.create_distribution_dataframe(train_percentage,val_percentage,test_percentage)
             
 

@@ -26,6 +26,7 @@ class Results():
                     if os.path.exists(join(experiment_path,'metrics_evaluation','val','val_metrics.csv')):
                         self.valid_experiment_list.append(experiment)
 
+    '''join all the selected experiments in a single dataframe'''
     def make_results_dataframe(self,checked_experiment_list,sort_by):
         val_df_list=[]
         test_df_list=[]

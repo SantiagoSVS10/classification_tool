@@ -5,11 +5,13 @@ import os
 from classification_models.tfkeras import Classifiers
 import efficientnet.tfkeras as efn
 
+'''This class is used for manage the diferent classification models.
+Here can be created new models.'''
+
 
 class ModelManager():
-    """
-    Class manager for diferent classification models 
-    """
+
+   
     __classification_models__ = Classifiers.models_names(
     )  # models in classification_models library
     __effn_models__ = [('EfficientNetB' + str(i))

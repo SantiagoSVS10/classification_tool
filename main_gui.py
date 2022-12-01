@@ -60,6 +60,7 @@ class MainWindow(QMainWindow):
         self.write_params_in_items()
         self.show()
 
+    '''function to select dataset from list'''
     def select_dataset_from_list(self):
         """Select a dataset from the list"""
         self.selected_dataset_name = self.dataset_list.currentItem().text()
@@ -69,6 +70,7 @@ class MainWindow(QMainWindow):
         self.current_dataset.create_distribution_dataframe()
         self.distributed()
     
+    '''function to select experiments from list'''
     def select_result_from_list(self):
         """Select a result from the list"""
         self.checked_experiments=[]
@@ -76,7 +78,8 @@ class MainWindow(QMainWindow):
         self.current_result=Results(self.selected_result_name)
         self.current_result.get_results_folders()
         self.put_experiments_in_experiments_list()
-        
+    
+    '''function to read experiment folders and put them in the list'''
     def put_experiments_in_experiments_list(self):
         '''delete previous experiments'''
         self.qt_experiments_list.clear()
@@ -89,6 +92,7 @@ class MainWindow(QMainWindow):
             new_experiment_item.setCheckState(QtCore.Qt.Unchecked)
             self.qt_experiments_list.addItem(new_experiment_item)
 
+    '''function to identify a tab change'''
     def tab_changed(self):
         '''clean layout when changing tab'''
         if self.tabWidget.currentIndex()==1:
@@ -100,6 +104,7 @@ class MainWindow(QMainWindow):
             self.comboClassification.setVisible(False)
             self.comboOrganizer.setVisible(True)
 
+    '''function to get checked set (validation or test)'''
     def get_checked_set(self):
         '''get checked item in groupbox by children'''
         for i in range(self.set_groupbox.layout().count()):
@@ -107,6 +112,7 @@ class MainWindow(QMainWindow):
                 self.checked_set=self.set_groupbox.layout().itemAt(i).widget().text()
         self.get_checked_experiments()
         
+    '''function to get the checked experiments in the gui'''
     def get_checked_experiments(self):
         """Get the checked experiments"""
         self.checked_experiments=[]
@@ -130,7 +136,8 @@ class MainWindow(QMainWindow):
         if len(self.checked_experiments)>0: 
             self.comboOrganizer.setEnabled(True)
             self.set_groupbox.setEnabled(True)
-            
+
+    '''function to show the experiment widgets'''
     def put_widgets(self):
         if self.checked_set=='Validation':
             for widget in self.current_result.val_widget_list:
@@ -139,20 +146,19 @@ class MainWindow(QMainWindow):
             for widget in self.current_result.test_widget_list:
                 self.val_results_layout.addWidget(widget)
     
+    '''function to put the individual images in a layout'''
     def put_individual_images(self):
         '''create a vertical layout for each checked experiment'''
         for widget in self.current_result.image_widgets:
             '''creake vertical layout'''
             self.h_lay_images.addWidget(widget)
 
-    def clean_images_layout(self,layout):
-        for i in reversed(range(layout.count())): 
-            layout.itemAt(i).layout().deleteLater()
-
+    '''function to clean a layout'''
     def clean_layout(self,layout):
         for i in reversed(range(layout.count())): 
             layout.itemAt(i).widget().setParent(None)
-            
+    
+    '''function to get the values from the entries and create new distribution'''
     def make_new_distribution_gui(self):
         """Make a new distribution of the current dataset"""
         train_percent=float(self.train_entry.text())
@@ -172,6 +178,7 @@ class MainWindow(QMainWindow):
         '''wait for the thread to finish'''
         self.training_thread.finished.connect(self.test_model)
 
+    '''function to start model testing'''
     def test_model(self):
         """Test the model in the test and validation dataset"""
         '''use trainer object from the training thread'''
@@ -193,6 +200,7 @@ class MainWindow(QMainWindow):
     #     trainer = ModelTrainer(self.selected_dataset_name,self.params)
     #     trainer.train(self.current_dataset,show_plots=False)
 
+    '''function to read params and put them in the gui'''
     def write_params_in_items(self):
         self.model_combobox.setCurrentText(self.params.model)
         self.batch_entry.setText(str(self.params.batch_size))
@@ -202,6 +210,7 @@ class MainWindow(QMainWindow):
         self.height_entry.setText(str(self.params.image_height))
         self.channels_entry.setText(str(self.params.channels))
 
+    '''function to update the params using the values in the gui'''
     def save_params_from_entries(self):
         """Save the parameters from the entries"""
         self.params.model=self.model_combobox.currentText()
@@ -213,6 +222,7 @@ class MainWindow(QMainWindow):
         self.params.channels=int(self.channels_entry.text())
         self.params.save(self.params_path)
 
+    '''function to display an image in a label'''
     def display_image(self,path,label):
         self.clean_display(label)
         image_profile = QtGui.QImage(path) #QImage object
@@ -223,14 +233,15 @@ class MainWindow(QMainWindow):
         '''resize image to fit in self.label'''
         image_profile = image_profile.scaled(width, height, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)  
         label.setPixmap(QtGui.QPixmap.fromImage(image_profile)) 
-        
+
+    '''function to clean one of the labels'''
     def clean_display(self,label):
         """Clean the display"""
         label.setText('')
         '''delete pixmap from label'''
         label.setPixmap(QtGui.QPixmap(''))
 
-
+    '''function to check the type of distribution'''
     def distributed(self):
         """Check if the current dataset is distributed"""
         
