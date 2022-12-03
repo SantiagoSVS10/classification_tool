@@ -11,6 +11,18 @@ Locate the project's root directory and use pip to install the requirements
 ```bash
 pip install -r requirements.txt
 ```
+Put the binary classification datasets in the datasets folder
+```bash
+└── data
+    └── datasets
+        ├── example_dataset_1
+        │         ├── image1.png
+        │         ├── image2.png
+        ├── example_dataset_2
+        │         ├── image1.png
+        │         ├── image2.png
+```
+
 Locate the project's root directory and run the following script (always run the scripts from root directory):
 ```bash
 python main_gui.py
