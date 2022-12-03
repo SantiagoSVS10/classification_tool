@@ -16,12 +16,24 @@ Put the binary classification datasets in the datasets folder
 └── data
     └── datasets
         ├── example_dataset_1
-        │         ├── image1.png
-        │         ├── image2.png
-        ├── example_dataset_2
-        │         ├── image1.png
-        │         ├── image2.png
-```
+        │         ├──classA
+        │         │     ├── image1.png
+        │         │     ├── image2.png
+        │         │     └──...
+        │         └──classB
+        │               ├── image1.png
+        │               ├── image2.png
+        │               └──...
+        │         
+        ├── example_dataset_1
+        │         ├──classA
+        │         │     ├── image1.png
+        │         │     ├── image2.png
+        │         │     └──...
+        │         └──classB
+        │               ├── image1.png
+        │               ├── image2.png
+        │               └──...
 
 Locate the project's root directory and run the following script (always run the scripts from root directory):
 ```bash
