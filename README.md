@@ -34,7 +34,7 @@ Put the binary classification datasets in the datasets folder
         │               ├── image1.png
         │               ├── image2.png
         │               └──...
-
+```
 Locate the project's root directory and run the following script (always run the scripts from root directory):
 ```bash
 python main_gui.py
